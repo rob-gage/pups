@@ -1,0 +1,8 @@
+# Copyright Rob Gage 2025
+
+[package]
+name = "pup"
+version = "0.0.0"
+edition = "2024"
+
+[dependencies]
