@@ -3,6 +3,7 @@
 mod choice;
 mod map;
 mod map_error;
+mod sequence;
 
 use choice::Choice;
 use crate::{
@@ -11,6 +12,7 @@ use crate::{
 };
 use map::Map;
 use map_error::MapError;
+use sequence::Sequence;
 
 /// Helper methods implemented for all parsers that allows easy construction of combinators
 pub trait Combinators<E, I, O>
@@ -36,6 +38,24 @@ where
         P: Parser<I, Error = E, Output = O> + 'static
     {
         Choice (vec![Box::new(self), Box::new(alternative_parser)])
+    }
+
+    /// Applies another parser in sequence
+    fn then<P>(self, next_parser: P) -> Sequence<E, I, O>
+    where
+        Self: 'static,
+        P: Parser<I, Error = E, Output = O> + 'static
+    {
+        Sequence(vec![(Box::new(self), true), (Box::new(next_parser), true)])
+    }
+
+    /// Applies another parser in sequence, but ignores its result
+    fn then_ignore<P>(self, next_parser: P) -> Sequence<E, I, O>
+    where
+        Self: 'static,
+        P: Parser<I, Error = E, Output = O> + 'static
+    {
+        Sequence(vec![(Box::new(self), true), (Box::new(next_parser), false)])
     }
 
 }
