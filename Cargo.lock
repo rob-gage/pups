@@ -3,5 +3,5 @@
 version = 4
 
 [[package]]
-name = "pup"
+name = "pup_parsers"
 version = "0.0.0"
