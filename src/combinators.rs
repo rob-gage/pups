@@ -1,8 +1,10 @@
 // Copyright Rob Gage 2025
 
+mod choice;
 mod map;
 mod map_error;
 
+use choice::Choice;
 use crate::{
     InputStream,
     Parser,
@@ -25,6 +27,15 @@ where
     /// Maps each of a parser's accumulated errors to a new type using a function
     fn map_error<F>(self, f: F) -> MapError<F, Self> {
         MapError { function: f, parser: self }
+    }
+
+    /// Tries parsers in order until one succeeds
+    fn or<P>(self, alternative_parser: P) -> Choice<E, I, O>
+    where
+        Self: 'static,
+        P: Parser<I, Error = E, Output = O> + 'static
+    {
+        Choice (vec![Box::new(self), Box::new(alternative_parser)])
     }
 
 }
