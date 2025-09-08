@@ -4,8 +4,8 @@ use crate::InputStream;
 
 /// Implementors can be parsed from an input type
 pub trait Parser<I>
-where I
-      : InputStream
+where
+    I: InputStream
 {
 
     /// The type for errors that can occur with this parser

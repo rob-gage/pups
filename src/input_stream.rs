@@ -1,10 +1,7 @@
 // Copyright Rob Gage 2025
 
 /// Implementors represent streams of input that can be consumed by parsers
-pub trait InputStream
-where Self
-      : Clone
-{
+pub trait InputStream {
 
     /// The type of item that is stored in the `InputStream`
     type Item;
