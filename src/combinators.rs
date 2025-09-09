@@ -3,7 +3,9 @@
 mod choice;
 mod map;
 mod map_error;
+mod preceded;
 mod sequence;
+mod terminated;
 
 use choice::Choice;
 use crate::{
@@ -13,6 +15,9 @@ use crate::{
 use map::Map;
 use map_error::MapError;
 use sequence::Sequence;
+
+pub use preceded::preceded;
+pub use terminated::terminated;
 
 /// Helper methods implemented for all parsers that allows easy construction of combinators
 pub trait Combinators<E, I, O>

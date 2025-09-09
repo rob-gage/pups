@@ -4,6 +4,6 @@ mod combinators;
 mod input_stream;
 mod parser;
 
-pub use combinators::Combinators;
+pub use combinators::*;
 pub use input_stream::InputStream;
 pub use parser::Parser;
