@@ -43,7 +43,14 @@ impl<E, I, OI, OM, PI, PM> Parser<I> for Terminated<PI, PM> where
 }
 
 /// Parser combinator that returns the output of a parser followed by another parser
-pub const fn terminated<PI, PM>(main_parser: PM, ignored_parser: PI) -> Terminated<PI, PM> {
+pub const fn terminated<E, I, OI, OM, PI, PM>(
+    main_parser: PM,
+    ignored_parser: PI
+) -> impl Parser<I, Error = E, Output = OM> where
+    I: InputStream,
+    PI: Parser<I, Output = OI, Error = E>,
+    PM: Parser<I, Output = OM, Error = E>,
+{
     Terminated {
         ignored_parser,
         main_parser,

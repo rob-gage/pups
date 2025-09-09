@@ -6,6 +6,7 @@ mod map_error;
 mod preceded;
 mod sequence;
 mod terminated;
+mod delimited;
 
 use choice::Choice;
 use crate::{

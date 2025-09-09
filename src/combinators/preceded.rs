@@ -43,7 +43,14 @@ impl<E, I, OI, OM, PI, PM> Parser<I> for Preceded<PI, PM> where
 }
 
 /// Parser combinator that returns the output of a parser preceded by another parser
-pub const fn preceded<PI, PM>(ignored_parser: PI, main_parser: PM) -> Preceded<PI, PM> {
+pub const fn preceded<E, I, OI, OM, PI, PM>(
+    ignored_parser: PI,
+    main_parser: PM
+) -> impl Parser<I, Error = E, Output = OM> where
+    I: InputStream,
+    PI: Parser<I, Output = OI, Error = E>,
+    PM: Parser<I, Output = OM, Error = E>,
+{
     Preceded {
         ignored_parser,
         main_parser,
