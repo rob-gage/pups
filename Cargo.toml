@@ -1,5 +1,5 @@
 # Copyright Rob Gage 2025
 
 [workspace]
-members = ["library"]
+members = ["library", "text"]
 resolver = "2"
