@@ -1,0 +1,12 @@
+# Copyright Rob Gage 2025
+
+[package]
+name = "pups"
+version = "0.0.0"
+license = "MIT"
+description = "Pretty Understandable Parsers"
+readme = "../README.md"
+repository = "https://github.com/rob-gage/pups"
+edition = "2021"
+
+[dependencies]
