@@ -1,11 +1,10 @@
 // Copyright Rob Gage 2025
 
-use crate::InputStream;
+use crate::Input;
 
 /// Implementors can be parsed from an input type
-pub trait Parser<I>
-where
-    I: InputStream
+pub trait Parser<I> where
+    I: Input
 {
 
     /// The type for errors that can occur with this parser

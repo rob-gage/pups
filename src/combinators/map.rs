@@ -1,7 +1,7 @@
 // Copyright Rob Gage 2025
 
 use crate::{
-    InputStream,
+    Input,
     Parser,
 };
 
@@ -16,7 +16,7 @@ pub struct Map<F, P> {
 impl<E, F, I, OA, OB, P> Parser<I> for Map<F, P>
 where
     F: Fn(OA) -> OB,
-    I: InputStream,
+    I: Input,
     P: Parser<I, Output =OA, Error = E>
 {
 

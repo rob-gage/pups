@@ -1,7 +1,7 @@
 // Copyright Rob Gage 2025
 
 use crate::{
-    InputStream,
+    Input,
     Parser,
 };
 
@@ -14,7 +14,7 @@ struct Preceded<PI, PM> {
 }
 
 impl<E, I, OI, OM, PI, PM> Parser<I> for Preceded<PI, PM> where
-    I: InputStream,
+    I: Input,
     PI: Parser<I, Output = OI, Error = E>,
     PM: Parser<I, Output = OM, Error = E>,
 {
@@ -47,7 +47,7 @@ pub const fn preceded<E, I, OI, OM, PI, PM>(
     ignored_parser: PI,
     main_parser: PM
 ) -> impl Parser<I, Error = E, Output = OM> where
-    I: InputStream,
+    I: Input,
     PI: Parser<I, Output = OI, Error = E>,
     PM: Parser<I, Output = OM, Error = E>,
 {

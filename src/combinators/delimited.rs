@@ -1,7 +1,7 @@
 // Copyright Rob Gage 2025
 
 use crate::{
-    InputStream,
+    Input,
     Parser,
 };
 use super::{
@@ -16,7 +16,7 @@ pub const fn delimited<E, I, OA, OB, OC, PA, PB, PC>(
     closing_delimiter: PC,
 ) -> impl Parser<I, Error = E, Output = OB>
 where
-    I: InputStream,
+    I: Input,
     PA: Parser<I, Output = OA, Error = E>,
     PB: Parser<I, Output = OB, Error = E>,
     PC: Parser<I, Output = OC, Error = E>,

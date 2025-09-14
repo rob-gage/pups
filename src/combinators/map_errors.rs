@@ -1,22 +1,22 @@
 // Copyright Rob Gage 2025
 
 use crate::{
-    InputStream,
+    Input,
     Parser,
 };
 
 /// Parser combinator that maps a parser's accumulated errors to a new type using a function
-pub struct MapError<F, P> {
+pub struct MapErrors<F, P> {
     /// The function used to map the errors
     pub function: F,
     /// The parser whose errors are mapped
     pub parser: P,
 }
 
-impl<EA, EB, F, I, O, P> Parser<I> for MapError<F, P>
+impl<EA, EB, F, I, O, P> Parser<I> for MapErrors<F, P>
 where
     F: Fn(EA) -> EB,
-    I: InputStream,
+    I: Input,
     P: Parser<I, Output = O, Error = EA>
 {
 

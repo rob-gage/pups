@@ -1,30 +1,29 @@
 // Copyright Rob Gage 2025
 
 mod choice;
+mod delimited;
 mod map;
-mod map_error;
+mod map_errors;
 mod preceded;
 mod sequence;
 mod terminated;
-mod delimited;
 
 use choice::Choice;
 use crate::{
-    InputStream,
+    Input,
     Parser,
 };
 use map::Map;
-use map_error::MapError;
+use map_errors::MapErrors;
 use sequence::Sequence;
 
 pub use preceded::preceded;
 pub use terminated::terminated;
 
 /// Helper methods implemented for all parsers that allows easy construction of combinators
-pub trait Combinators<E, I, O>
-where
+pub trait Combinators<E, I, O> where
     Self: Parser<I, Error = E, Output = O> + Sized,
-    I: InputStream
+    I: Input
 {
 
     /// Maps a parser's output to another type using a function
@@ -33,8 +32,8 @@ where
     }
 
     /// Maps each of a parser's accumulated errors to a new type using a function
-    fn map_error<F>(self, f: F) -> MapError<F, Self> {
-        MapError { function: f, parser: self }
+    fn map_errors<F>(self, f: F) -> MapErrors<F, Self> {
+        MapErrors { function: f, parser: self }
     }
 
     /// Tries parsers in order until one succeeds
@@ -68,6 +67,6 @@ where
 
 impl<E, I, O, T> Combinators<E, I, O> for T
 where
-    I: InputStream,
+    I: Input,
     T: Parser<I, Error = E, Output = O>
 { }

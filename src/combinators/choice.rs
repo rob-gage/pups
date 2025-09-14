@@ -2,7 +2,7 @@
 
 use crate::{
     Combinators,
-    InputStream,
+    Input,
     Parser
 };
 
@@ -11,7 +11,7 @@ use crate::{
 pub struct Choice<E, I, O> (pub Vec<Box<dyn Parser<I, Error = E, Output = O>>>);
 
 impl<E, I, O> Choice<E, I, O> where
-    I: InputStream
+    I: Input
 {
 
     /// Tries parsers in order until one succeeds
@@ -25,7 +25,7 @@ impl<E, I, O> Choice<E, I, O> where
 }
 
 impl<E, I, O> Parser<I> for Choice<E, I, O> where
-    I: InputStream
+    I: Input
 {
 
     type Error = E;

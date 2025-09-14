@@ -1,9 +1,9 @@
 // Copyright Rob Gage 2025
 
 mod combinators;
-mod input_stream;
+mod input;
 mod parser;
 
 pub use combinators::*;
-pub use input_stream::InputStream;
+pub use input::Input;
 pub use parser::Parser;

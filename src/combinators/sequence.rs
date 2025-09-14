@@ -2,7 +2,7 @@
 
 use crate::{
     Combinators,
-    InputStream,
+    Input,
     Parser,
 };
 
@@ -10,7 +10,7 @@ use crate::{
 pub struct Sequence<E, I, O> (pub Vec<(Box<dyn Parser<I, Error = E, Output = O>>, bool)>);
 
 impl<E, I, O> Sequence<E, I, O> where
-    I: InputStream
+    I: Input
 {
 
     /// Applies another parser in sequence
@@ -34,7 +34,7 @@ impl<E, I, O> Sequence<E, I, O> where
 }
 
 impl<E, I, O> Parser<I> for Sequence<E, I, O> where
-    I: InputStream
+    I: Input
 {
 
     type Error = E;
