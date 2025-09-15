@@ -10,3 +10,4 @@ repository = "https://github.com/rob-gage/pups"
 edition = "2021"
 
 [dependencies]
+pups = { version = "0.0.0", path = "../library" }
