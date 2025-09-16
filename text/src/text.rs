@@ -21,7 +21,7 @@ impl<T> Input for Text<T> where
 {
 
     type Item = T;
-
+    
     fn cursor(&self) -> usize { self.cursor }
 
     fn next(&mut self) -> Option<Self::Item> {

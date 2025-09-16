@@ -14,11 +14,14 @@ pub trait Character where
     /// Returns `true` if this `Character` is whitespace
     fn is_whitespace(&self) -> bool;
 
-    /// The length of this character in bytes
+    /// The length of this `Character` in bytes
     fn length(&self) -> usize;
 
-    /// Returns the next character from a given string slice
+    /// Returns the next `Character` from a given string slice
     fn next(string: &str) -> Option<Self>;
+
+    /// Writes the character at the end of a `&mut String`
+    fn write(&self, buffer: &mut String);
 
 }
 
@@ -43,5 +46,7 @@ impl Character for char {
     fn length(&self) -> usize { self.len_utf8() }
 
     fn next(string: &str) -> Option<Self> { string.chars().next() }
+
+    fn write(&self, buffer: &mut String) { buffer.push(*self) }
 
 }

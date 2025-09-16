@@ -2,6 +2,9 @@
 
 mod character;
 mod text;
+mod parsers;
 
-pub use character::Character;
+use character::Character;
+
+pub use parsers::*;
 pub use text::Text;
