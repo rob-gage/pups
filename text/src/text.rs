@@ -3,6 +3,7 @@
 use crate::Character;
 use pups::Input;
 use std::marker::PhantomData;
+use crate::text_input::TextInput;
 
 /// UTF-8 text that can be consumed by parsers
 pub struct Text<T = char> where
@@ -11,7 +12,7 @@ pub struct Text<T = char> where
     /// The buffer that stores the `Text`
     buffer: String,
     /// The byte offset in the buffer that represents the start of the `Text`
-    cursor: usize,
+    byte_offset: usize,
     /// Phantom data used to allow a generic `Character` type
     _phantom_data: PhantomData<T>
 }
@@ -21,18 +22,27 @@ impl<T> Input for Text<T> where
 {
 
     type Item = T;
-    
-    fn cursor(&self) -> usize { self.cursor }
+
+    fn cursor(&self) -> usize { self.byte_offset }
 
     fn next(&mut self) -> Option<Self::Item> {
         if let Some (character) = self.peek() {
-            self.cursor += character.length();
+            self.byte_offset += character.length();
             Some (character)
         } else { None }
     }
 
-    fn peek(&self) -> Option<Self::Item> { T::next(&self.buffer[self.cursor..]) }
+    fn peek(&self) -> Option<Self::Item> { T::next(&self.buffer[self.byte_offset..]) }
 
-    fn set_cursor(&mut self, cursor: usize) { self.cursor = cursor; }
+    fn set_cursor(&mut self, cursor: usize) { self.byte_offset = cursor; }
+
+}
+
+impl<T> TextInput for Text<T> where
+    T: Character
+{
+    fn starts_with(&self, string: &str) -> bool { self.buffer[self.byte_offset..].starts_with(string) }
+
+    fn skip_bytes(&mut self, byte_count: usize) { self.set_cursor(self.byte_offset + byte_count) }
 
 }
