@@ -13,7 +13,10 @@ pub trait Parser<I> where
     /// The output type that is parsed by this parser
     type Output;
 
-    /// Parses an `InputStream` to return `Self::Output` or `Vec<Self::Error>`
+    /// Consumes `Input` and returns true if it can be accepted by this parser
+    fn accept(&self, input: &mut I) -> bool { self.parse(input).is_ok() }
+
+    /// Parses a `Input` to return `Self::Output` or `Vec<Self::Error>`
     fn parse(&self, input: &mut I) -> Result<Self::Output, Vec<Self::Error>>;
 
 }
