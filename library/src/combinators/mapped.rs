@@ -23,8 +23,10 @@ impl<EA, EB, I, M, P, OA, OB> Parser<I> for Mapped<M, P> where
 
     type Output = OB;
 
-    fn parse(&self, inputs: &mut I) -> Result<OB, Vec<EB>> {
-        (self.mapper)(self.parser.parse(inputs))
+    fn accept(&self, input: &mut I) -> bool { self.parser.accept(input) }
+
+    fn parse(&self, input: &mut I) -> Result<OB, Vec<EB>> {
+        (self.mapper)(self.parser.parse(input))
     }
 
 }
@@ -37,6 +39,4 @@ pub const fn mapped<EA, EB, I, M, OA, OB, P>(
     I: Input,
     M: Fn(Result<OA, Vec<EA>>) -> Result<OB, Vec<EB>>,
     P: Parser<I, Error = EA, Output = OA>,
-{
-    Mapped { mapper, parser }
-}
+{ Mapped { mapper, parser } }

@@ -23,6 +23,16 @@ impl<E, I, O2, O1, P2, P1> Parser<I> for Terminated<P2, P1> where
 
     type Output = O1;
 
+    fn accept(&self, input: &mut I) -> bool {
+        let cursor: usize = input.cursor();
+        if !self.parser.accept(input) {
+            input.set_cursor(cursor); return false;
+        }
+        if !self.terminator.accept(input) {
+            input.set_cursor(cursor); false
+        } else { true }
+    }
+
     fn parse(&self, input: &mut I) -> Result<Self::Output, Vec<Self::Error>> {
         let cursor: usize = input.cursor();
         match self.parser.parse(input) {
