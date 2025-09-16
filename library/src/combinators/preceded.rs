@@ -5,32 +5,32 @@ use crate::{
     Parser,
 };
 
-/// Parser combinator that returns the output of a parser preceded by another parser
-struct Preceded<PI, PM> {
-    /// The parser whose output is ignored before the main parser
-    ignored_parser: PI,
+/// See `preceded`
+struct Preceded<P1, P2> {
     /// The parser whose output is returned
-    main_parser: PM,
+    parser: P2,
+    /// The prefix whose output is ignored
+    prefix: P1,
 }
 
-impl<E, I, OI, OM, PI, PM> Parser<I> for Preceded<PI, PM> where
+impl<E, I, O1, O2, P1, P2> Parser<I> for Preceded<P1, P2> where
     I: Input,
-    PI: Parser<I, Output = OI, Error = E>,
-    PM: Parser<I, Output = OM, Error = E>,
+    P1: Parser<I, Output = O1, Error = E>,
+    P2: Parser<I, Output = O2, Error = E>,
 {
 
     type Error = E;
 
-    type Output = OM;
+    type Output = O2;
 
     fn parse(&self, input: &mut I) -> Result<Self::Output, Vec<Self::Error>> {
         let cursor: usize = input.cursor();
-        match self.ignored_parser.parse(input) {
+        match self.prefix.parse(input) {
             Err (errors) => {
                 input.set_cursor(cursor);
                 Err (errors)
             }
-            _ => match self.main_parser.parse(input) {
+            _ => match self.parser.parse(input) {
                 Err (errors) => {
                     input.set_cursor(cursor);
                     Err (errors)
@@ -42,17 +42,12 @@ impl<E, I, OI, OM, PI, PM> Parser<I> for Preceded<PI, PM> where
 
 }
 
-/// Parser combinator that returns the output of a parser preceded by another parser
-pub const fn preceded<E, I, OI, OM, PI, PM>(
-    ignored_parser: PI,
-    main_parser: PM
-) -> impl Parser<I, Error = E, Output = OM> where
+/// Parses input after a prefix
+pub const fn preceded<E, I, O1, O2, P1, P2>(
+    prefix: P1,
+    parser: P2
+) -> impl Parser<I, Error = E, Output = O2> where
     I: Input,
-    PI: Parser<I, Output = OI, Error = E>,
-    PM: Parser<I, Output = OM, Error = E>,
-{
-    Preceded {
-        ignored_parser,
-        main_parser,
-    }
-}
+    P1: Parser<I, Output = O1, Error = E>,
+    P2: Parser<I, Output = O2, Error = E>,
+{ Preceded { parser, prefix} }

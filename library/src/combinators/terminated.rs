@@ -5,32 +5,32 @@ use crate::{
     Parser,
 };
 
-/// Parser combinator that returns the output of a parser followed by another parser
-struct Terminated<PI, PM> {
-    /// The parser whose output is ignored after the main parser
-    ignored_parser: PI,
+/// See `terminated`
+struct Terminated<P2, P1> {
     /// The parser whose output is returned
-    main_parser: PM,
+    parser: P1,
+    /// The terminator whose output is ignored
+    terminator: P2,
 }
 
-impl<E, I, OI, OM, PI, PM> Parser<I> for Terminated<PI, PM> where
+impl<E, I, O2, O1, P2, P1> Parser<I> for Terminated<P2, P1> where
     I: Input,
-    PI: Parser<I, Output = OI, Error = E>,
-    PM: Parser<I, Output = OM, Error = E>,
+    P2: Parser<I, Output = O2, Error = E>,
+    P1: Parser<I, Output = O1, Error = E>,
 {
 
     type Error = E;
 
-    type Output = OM;
+    type Output = O1;
 
     fn parse(&self, input: &mut I) -> Result<Self::Output, Vec<Self::Error>> {
         let cursor: usize = input.cursor();
-        match self.main_parser.parse(input) {
+        match self.parser.parse(input) {
             Err (errors) => {
                 input.set_cursor(cursor);
                 Err (errors)
             }
-            Ok (output) => match self.ignored_parser.parse(input) {
+            Ok (output) => match self.terminator.parse(input) {
                 Err (errors) => {
                     input.set_cursor(cursor);
                     Err (errors)
@@ -42,17 +42,12 @@ impl<E, I, OI, OM, PI, PM> Parser<I> for Terminated<PI, PM> where
 
 }
 
-/// Parser combinator that returns the output of a parser followed by another parser
-pub const fn terminated<E, I, OI, OM, PI, PM>(
-    main_parser: PM,
-    ignored_parser: PI
-) -> impl Parser<I, Error = E, Output = OM> where
+/// Parses input before a terminator
+pub const fn terminated<E, I, O2, O1, P2, P1>(
+    parser: P1,
+    terminator: P2
+) -> impl Parser<I, Error = E, Output = O1> where
     I: Input,
-    PI: Parser<I, Output = OI, Error = E>,
-    PM: Parser<I, Output = OM, Error = E>,
-{
-    Terminated {
-        ignored_parser,
-        main_parser,
-    }
-}
+    P2: Parser<I, Output = O2, Error = E>,
+    P1: Parser<I, Output = O1, Error = E>,
+{ Terminated { parser, terminator } }

@@ -2,8 +2,7 @@
 
 mod choice;
 mod delimited;
-mod map;
-mod map_errors;
+mod mapped;
 mod preceded;
 mod sequence;
 mod terminated;
@@ -13,10 +12,10 @@ use crate::{
     Input,
     Parser,
 };
-use map::Map;
-use map_errors::MapErrors;
 use sequence::Sequence;
 
+pub use delimited::delimited;
+pub use mapped::mapped;
 pub use preceded::preceded;
 pub use terminated::terminated;
 
@@ -27,13 +26,18 @@ pub trait Combinators<E, I, O> where
 {
 
     /// Maps a parser's output to another type using a function
-    fn map<F>(self, f: F) -> Map<F, Self> {
-        Map { function: f, parser: self }
+    fn map<F, _O>(self, f: F) -> impl Parser<I, Error = E, Output = _O> where
+        F: Fn(O) -> _O
+    {
+        mapped(self, move |result: Result<O, Vec<E>>| result.map(|output: O| f(output)))
     }
 
     /// Maps each of a parser's accumulated errors to a new type using a function
-    fn map_errors<F>(self, f: F) -> MapErrors<F, Self> {
-        MapErrors { function: f, parser: self }
+    fn map_errors<F, _E>(self, f: F) -> impl Parser<I, Error = _E, Output = O> where
+        F: Clone + Fn(E) -> _E
+    {
+        mapped(self, move |result: Result<O, Vec<E>>| result
+            .map_err(|errors: Vec<E>| errors.into_iter().map(f.clone()).collect()))
     }
 
     /// Tries parsers in order until one succeeds

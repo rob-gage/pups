@@ -9,17 +9,15 @@ use super::{
     terminated,
 };
 
-/// Wrap a parser in delimiters
-pub const fn delimited<E, I, OA, OB, OC, PA, PB, PC>(
-    opening_delimiter: PA,
-    parser: PB,
-    closing_delimiter: PC,
-) -> impl Parser<I, Error = E, Output = OB>
+/// Parses input between a prefix and a terminator
+pub const fn delimited<E, I, O1, O2, O3, P1, P2, P3>(
+    prefix: P1,
+    main_parser: P2,
+    terminator: P3,
+) -> impl Parser<I, Error = E, Output = O2>
 where
     I: Input,
-    PA: Parser<I, Output = OA, Error = E>,
-    PB: Parser<I, Output = OB, Error = E>,
-    PC: Parser<I, Output = OC, Error = E>,
-{
-    preceded(opening_delimiter, terminated(parser, closing_delimiter))
-}
+    P1: Parser<I, Output = O1, Error = E>,
+    P2: Parser<I, Output = O2, Error = E>,
+    P3: Parser<I, Output = O3, Error = E>,
+{ preceded(prefix, terminated(main_parser, terminator)) }
