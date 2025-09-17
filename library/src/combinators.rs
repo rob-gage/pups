@@ -2,6 +2,7 @@
 
 mod delimited;
 mod mapped;
+mod optional;
 mod preceded;
 mod terminated;
 
@@ -14,6 +15,7 @@ use crate::{
 
 pub use delimited::delimited;
 pub use mapped::mapped;
+pub use optional::optional;
 pub use preceded::preceded;
 pub use terminated::terminated;
 
@@ -48,6 +50,9 @@ pub trait Combinators<E, I, O> where
     fn or<P>(self, alternative: P) -> impl Parser<I, Error = E, Output = O> where
         P: Parser<I, Error = E, Output = O>
     { Choice { alternative, primary: self } }
+
+    /// Try a parser as optional
+    fn or_not(self) -> impl Parser<I, Error = E, Output = Option<O>> { optional(self) }
 
     /// Applies another parser in sequence after this one
     fn then<P, _O>(self, next: P) -> impl Parser<I, Error = E, Output = (O, _O)> where
