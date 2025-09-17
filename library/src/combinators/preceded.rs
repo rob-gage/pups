@@ -5,6 +5,7 @@ use crate::{
     Parser,
 };
 
+
 /// See `preceded`
 struct Preceded<P1, P2> {
     /// The parser whose output is returned
@@ -12,6 +13,7 @@ struct Preceded<P1, P2> {
     /// The prefix whose output is ignored
     prefix: P1,
 }
+
 
 impl<E, I, O1, O2, P1, P2> Parser<I> for Preceded<P1, P2> where
     I: Input,
@@ -51,6 +53,7 @@ impl<E, I, O1, O2, P1, P2> Parser<I> for Preceded<P1, P2> where
     }
 
 }
+
 
 /// Parses input after a prefix
 pub const fn preceded<E, I, O1, O2, P1, P2>(

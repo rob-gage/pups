@@ -5,6 +5,7 @@ use crate::{
     Parser,
 };
 
+
 /// See `terminated`
 struct Terminated<P2, P1> {
     /// The parser whose output is returned
@@ -13,12 +14,12 @@ struct Terminated<P2, P1> {
     terminator: P2,
 }
 
+
 impl<E, I, O2, O1, P2, P1> Parser<I> for Terminated<P2, P1> where
     I: Input,
     P2: Parser<I, Output = O2, Error = E>,
     P1: Parser<I, Output = O1, Error = E>,
 {
-
     type Error = E;
 
     type Output = O1;
@@ -36,21 +37,21 @@ impl<E, I, O2, O1, P2, P1> Parser<I> for Terminated<P2, P1> where
     fn parse(&self, input: &mut I) -> Result<Self::Output, Vec<Self::Error>> {
         let cursor: usize = input.cursor();
         match self.parser.parse(input) {
-            Err (errors) => {
+            Err(errors) => {
                 input.set_cursor(cursor);
-                Err (errors)
+                Err(errors)
             }
-            Ok (output) => match self.terminator.parse(input) {
-                Err (errors) => {
+            Ok(output) => match self.terminator.parse(input) {
+                Err(errors) => {
                     input.set_cursor(cursor);
-                    Err (errors)
+                    Err(errors)
                 }
-                _ => Ok (output)
+                _ => Ok(output)
             }
         }
     }
-
 }
+
 
 /// Parses input before a terminator
 pub const fn terminated<E, I, O2, O1, P2, P1>(

@@ -5,6 +5,7 @@ use crate::{
     Parser,
 };
 
+
 /// See `mapped`
 struct Mapped<M, P> {
     /// The function used to map the result of the parser
@@ -12,6 +13,7 @@ struct Mapped<M, P> {
     /// The parser whose result is mapped
     parser: P,
 }
+
 
 impl<EA, EB, I, M, P, OA, OB> Parser<I> for Mapped<M, P> where
     M: Fn(Result<OA, Vec<EA>>) -> Result<OB, Vec<EB>>,
@@ -30,6 +32,7 @@ impl<EA, EB, I, M, P, OA, OB> Parser<I> for Mapped<M, P> where
     }
 
 }
+
 
 /// Maps the result of one parser into a new type using a mapper function
 pub const fn mapped<EA, EB, I, M, OA, OB, P>(
