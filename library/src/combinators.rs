@@ -6,6 +6,7 @@ mod preceded;
 mod terminated;
 
 use crate::{
+    Choice,
     Input,
     Parser,
     Sequence,
@@ -24,9 +25,9 @@ pub trait Combinators<E, I, O> where
 {
 
     /// Ignores this parser's result and applies another in sequence after it
-    fn ignore_then<P, _O>(self, parser: P) -> impl Parser<I, Error = E, Output = _O> where
+    fn ignore_then<P, _O>(self, next: P) -> impl Parser<I, Error = E, Output = _O> where
         P: Parser<I, Error = E, Output = _O>
-    { Sequence { head: self, tail: parser }.map(|(_, output)| output) }
+    { Sequence { head: self, tail: next }.map(|(_, output)| output) }
 
     /// Maps a parser's output to another type using a function
     fn map<F, _O>(self, f: F) -> impl Parser<I, Error = E, Output = _O> where
@@ -43,15 +44,20 @@ pub trait Combinators<E, I, O> where
             .map_err(|errors: Vec<E>| errors.into_iter().map(f.clone()).collect()))
     }
 
+    /// Tries another parser if this one fails
+    fn or<P>(self, alternative: P) -> impl Parser<I, Error = E, Output = O> where
+        P: Parser<I, Error = E, Output = O>
+    { Choice { alternative, primary: self } }
+
     /// Applies another parser in sequence after this one
-    fn then<P, _O>(self, parser: P) -> impl Parser<I, Error = E, Output = (O, _O)> where
+    fn then<P, _O>(self, next: P) -> impl Parser<I, Error = E, Output = (O, _O)> where
         P: Parser<I, Error = E, Output = _O>
-    { Sequence { head: self, tail: parser } }
+    { Sequence { head: self, tail: next } }
 
     /// Applies another parser in sequence after this one, but ignores its result
-    fn then_ignore<P, _O>(self, parser: P) -> impl Parser<I, Error = E, Output = O> where
+    fn then_ignore<P, _O>(self, next: P) -> impl Parser<I, Error = E, Output = O> where
         P: Parser<I, Error = E, Output = _O>
-    { Sequence { head: self, tail: parser }.map(|(output, _)| output) }
+    { Sequence { head: self, tail: next }.map(|(output, _)| output) }
 
 }
 
