@@ -10,6 +10,7 @@ use crate::{
     Parser,
 };
 
+
 /// A combinator that applies one parser, and then another if the first fails, and returns
 /// the output from the one that succeeds or the errors from both if they fail
 pub struct Choice<P1, P2> {

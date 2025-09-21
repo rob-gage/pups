@@ -10,6 +10,7 @@ use crate::{
     Parser,
 };
 
+
 /// A combinator that applies one parser, then another, and then returns their outputs as a tuple
 pub struct Sequenced<P1, P2> {
     /// The head of the `Sequence`
