@@ -2,19 +2,19 @@
 
 mod choice;
 mod mapped;
-mod preceded;
 mod sequenced;
-mod terminated;
 
 use crate::{
     Input,
-    ParseResult,
+    ParseResult::{
+        self,
+        Failure,
+        Success,
+    },
 };
 use choice::Choice;
 use mapped::Mapped;
-use preceded::Preceded;
 use sequenced::Sequenced;
-use terminated::Terminated;
 
 /// Implementors can be parsed from an input type
 pub trait Parser<I> where
@@ -22,17 +22,13 @@ pub trait Parser<I> where
     I: Input
 {
 
+    // PARSER IMPLEMENTATION
+
     /// The type for errors that can occur with this parser
     type Error;
 
     /// The output type that is parsed by this parser
     type Output;
-
-    // PARSER IMPLEMENTATION
-
-    /// Parses input ignoring the output and errors, only returning a boolean if it was parsed
-    /// successfully
-    fn accept(&self, input: &mut I) -> bool { self.parse(input).output().is_some() }
 
     /// Parses a `Input` to return `Self::Output` or `Vec<Self::Error>`
     fn parse(&self, input: &mut I) -> ParseResult<Self::Output, Self::Error>;
@@ -66,13 +62,9 @@ pub trait Parser<I> where
         self,
         f: F
     ) -> impl Parser<I, Error = Self::Error, Output = O> where
-        F: Fn(Self::Output) -> O
+        F: Clone + Fn(Self::Output) -> O
     {
-        mapped(
-            self,
-            move |result: Result<Self::Output, Vec<Self::Error>>|
-                result.map(|output: Self::Output| f(output))
-        )
+        mapped(self, move |result| result.map(f.clone()))
     }
 
     /// Maps each of a parser's accumulated errors to a new type using a function
@@ -82,7 +74,7 @@ pub trait Parser<I> where
     ) -> impl Parser<I, Error = E, Output = Self::Output> where
         F: Clone + Fn(Self::Error) -> E
     {
-        mapped(self, move |result: ParseResult<_, _>| result.map_errors(f))
+        mapped(self, move |result| result.map_errors(f.clone()))
     }
 
     /// Applies another parser in sequence after this one
@@ -106,7 +98,7 @@ pub trait Parser<I> where
 
 /// Applies a parser preceded by an ignored prefix parser, and followed by an ignored terminator
 /// parser
-pub const fn delimited<E, I, O1, O2, O3, P1, P2, P3>(
+pub fn delimited<E, I, O1, O2, O3, P1, P2, P3>(
     prefix: P1,
     parser: P2,
     terminator: P3,
@@ -125,8 +117,8 @@ pub const fn optional<E, I, O, P>(parser: P)-> impl Parser<I, Error = E, Output 
     P: Parser<I, Output = O, Error = E>,
 {
     mapped(parser, |result| match result {
-        Ok (output) => Ok (Some (output)),
-        Err (errors) => Ok (None)
+        Success (output, errors) => Success (Some (output), errors),
+        Failure (_) => Success(None, vec![])
     })
 }
 
@@ -137,28 +129,34 @@ pub const fn mapped<EA, EB, I, M, OA, OB, P>(
     mapper: M
 ) -> impl Parser<I, Error = EB, Output = OB> where
     I: Input,
-    M: Fn(Result<OA, Vec<EA>>) -> Result<OB, Vec<EB>>,
+    M: Fn(ParseResult<OA, EA>) -> ParseResult<OB, EB>,
     P: Parser<I, Error = EA, Output = OA>,
 { Mapped { mapper, parser } }
 
 
 /// Applies a parser after an ignored prefix parser
-pub const fn preceded<E, I, O1, O2, P1, P2>(
+pub fn preceded<E, I, O1, O2, P1, P2>(
     prefix: P1,
     parser: P2
 ) -> impl Parser<I, Error = E, Output = O2> where
     I: Input,
     P1: Parser<I, Output = O1, Error = E>,
     P2: Parser<I, Output = O2, Error = E>,
-{ Preceded { parser, prefix} }
+{
+    Sequenced { head: prefix, tail: parser }
+        .map(|(_, output)| output)
+}
 
 
 /// Applies a parser followed by an ignored terminator parser
-pub const fn terminated<E, I, O2, O1, P2, P1>(
+pub fn terminated<E, I, O2, O1, P2, P1>(
     parser: P1,
     terminator: P2
 ) -> impl Parser<I, Error = E, Output = O1> where
     I: Input,
     P2: Parser<I, Output = O2, Error = E>,
     P1: Parser<I, Output = O1, Error = E>,
-{ Terminated { parser, terminator } }
+{
+    Sequenced { head: parser, tail: terminator }
+        .map(|(output, _)| output)
+}

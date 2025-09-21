@@ -26,8 +26,6 @@ impl<EA, EB, I, M, P, OA, OB> Parser<I> for Mapped<M, P> where
 
     type Output = OB;
 
-    fn accept(&self, input: &mut I) -> bool { self.parser.accept(input) }
-
     fn parse(&self, input: &mut I) -> ParseResult<OB, EB> {
         (self.mapper)(self.parser.parse(input))
     }

@@ -6,6 +6,11 @@ use crate::{
 };
 use pups::{
     Input,
+    ParseResult::{
+        self,
+        Failure,
+        Success,
+    },
     Parser,
 };
 
@@ -17,18 +22,15 @@ impl<I, T> Parser<I> for Keyword where
     T: Character,
 {
 
-    type Output = ();
-
     type Error = ();
 
-    fn accept(&self, input: &mut I) -> bool {
-        if input.starts_with(&self.0) {
-            input.skip_bytes(self.0.len()); true
-        } else { false }
-    }
+    type Output = ();
 
-    fn parse(&self, input: &mut I) -> Result<Self::Output, Vec<Self::Error>> {
-        if self.accept(input) { Ok (()) } else { Err (vec![]) }
+    fn parse(&self, input: &mut I) -> ParseResult<Self::Output, Self::Error> {
+        if input.starts_with(&self.0) {
+            input.skip_bytes(self.0.len());
+            Success ((), vec![])
+        } else { Failure (vec![]) }
     }
 
 }

@@ -2,6 +2,11 @@
 
 use crate::{
     Input,
+    ParseResult::{
+        self,
+        Failure,
+        Success,
+    },
     Parser,
 };
 
@@ -23,35 +28,22 @@ impl<E, I, O1, O2, P1, P2> Parser<I> for Sequenced<P1, P2> where
 
     type Output = (O1, O2);
 
-    fn accept(&self, input: &mut I) -> bool {
+    fn parse(&self, input: &mut I) -> ParseResult<Self::Output, Self::Error> {
         let cursor: usize = input.cursor();
-        if !self.head.accept(input) {
-            input.set_cursor(cursor);
-            return false;
+        match self.head.parse(input) {
+            Failure (head_errors) => Failure (head_errors),
+            Success (head_output, mut head_errors) => match self.tail.parse(input) {
+                Failure (tail_errors) => {
+                    input.set_cursor(cursor);
+                    head_errors.extend(tail_errors);
+                    Failure (head_errors)
+                }
+                Success (tail_output, tail_errors) => {
+                    head_errors.extend(tail_errors);
+                    Success ((head_output, tail_output), head_errors)
+                }
+            }
         }
-        if !self.tail.accept(input) {
-            input.set_cursor(cursor);
-            false
-        } else { true }
-    }
-
-    fn parse(&self, input: &mut I) -> Result<(O1, O2), Vec<E>> {
-        let cursor: usize = input.cursor();
-        let head: O1 = match self.head.parse(input) {
-            Ok (output) => output,
-            Err (errors) => {
-                input.set_cursor(cursor);
-                return Err (errors)
-            },
-        };
-        let tail: O2 = match self.tail.parse(input) {
-            Ok (output) => output,
-            Err (errors) => {
-                input.set_cursor(cursor);
-                return Err (errors)
-            },
-        };
-        Ok ((head, tail))
     }
 
 }
