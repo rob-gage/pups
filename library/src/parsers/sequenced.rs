@@ -1,20 +1,19 @@
 // Copyright Rob Gage 2025
 
 use crate::{
-    Combinators,
     Input,
     Parser,
 };
 
-/// A sequence of parsers that output optional values that are returned as a `Vec<_>`
-pub struct Sequence<P1, P2> {
+/// A combinator that applies one parser, then another, and then returns their outputs as a tuple
+pub struct Sequenced<P1, P2> {
     /// The head of the `Sequence`
     pub head: P1,
     /// The tail of the `Sequence`
     pub tail: P2,
 }
 
-impl<E, I, O1, O2, P1, P2> Parser<I> for Sequence<P1, P2> where
+impl<E, I, O1, O2, P1, P2> Parser<I> for Sequenced<P1, P2> where
     I: Input,
     P1: Parser<I, Error = E, Output = O1>,
     P2: Parser<I, Error = E, Output = O2>,

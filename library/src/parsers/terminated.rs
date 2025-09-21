@@ -6,12 +6,13 @@ use crate::{
 };
 
 
-/// See `terminated`
-struct Terminated<P2, P1> {
+/// A combinator that returns the result of a parser followed by another
+/// parser, with the result of this second parser being ignored
+pub struct Terminated<P2, P1> {
     /// The parser whose output is returned
-    parser: P1,
-    /// The terminator whose output is ignored
-    terminator: P2,
+    pub parser: P1,
+    /// The terminator parser whose output is ignored
+    pub terminator: P2,
 }
 
 
@@ -51,14 +52,3 @@ impl<E, I, O2, O1, P2, P1> Parser<I> for Terminated<P2, P1> where
         }
     }
 }
-
-
-/// Parses input before a terminator
-pub const fn terminated<E, I, O2, O1, P2, P1>(
-    parser: P1,
-    terminator: P2
-) -> impl Parser<I, Error = E, Output = O1> where
-    I: Input,
-    P2: Parser<I, Output = O2, Error = E>,
-    P1: Parser<I, Output = O1, Error = E>,
-{ Terminated { parser, terminator } }

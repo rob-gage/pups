@@ -6,12 +6,13 @@ use crate::{
 };
 
 
-/// See `preceded`
-struct Preceded<P1, P2> {
+/// A combinator that returns the result of a parser preceded by another
+/// parser, with the result of this preceding parser being ignored
+pub struct Preceded<P1, P2> {
     /// The parser whose output is returned
-    parser: P2,
-    /// The prefix whose output is ignored
-    prefix: P1,
+    pub parser: P2,
+    /// The prefix parser whose output is ignored
+    pub prefix: P1,
 }
 
 
@@ -53,14 +54,3 @@ impl<E, I, O1, O2, P1, P2> Parser<I> for Preceded<P1, P2> where
     }
 
 }
-
-
-/// Parses input after a prefix
-pub const fn preceded<E, I, O1, O2, P1, P2>(
-    prefix: P1,
-    parser: P2
-) -> impl Parser<I, Error = E, Output = O2> where
-    I: Input,
-    P1: Parser<I, Output = O1, Error = E>,
-    P2: Parser<I, Output = O2, Error = E>,
-{ Preceded { parser, prefix} }

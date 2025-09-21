@@ -1,14 +1,9 @@
 // Copyright Rob Gage 2025
 
-mod choice;
-mod combinators;
 mod input;
-mod parser;
-mod sequence;
+mod parsers;
+mod parse_result;
 
-use choice::Choice;
-use sequence::Sequence;
-
-pub use combinators::*;
 pub use input::Input;
-pub use parser::Parser;
+pub use parse_result::ParseResult;
+pub use parsers::*;
