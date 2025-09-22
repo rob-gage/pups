@@ -6,11 +6,8 @@ mod sequenced;
 
 use crate::{
     Input,
-    ParseResult::{
-        self,
-        Failure,
-        Success,
-    },
+    ParseMode,
+    ParseResult,
 };
 use choice::Choice;
 use mapped::Mapped;
@@ -27,11 +24,18 @@ pub trait Parser<I> where
     /// The type for errors that can occur with this parser
     type Error;
 
+    /// The type for messages that may be returned by this parser
+    type Message;
+
     /// The output type that is parsed by this parser
     type Output;
 
     /// Parses a `Input` to return `Self::Output` or `Vec<Self::Error>`
-    fn parse(&self, input: &mut I) -> ParseResult<Self::Output, Self::Error>;
+    fn parse<MODE>(
+        &self,
+        input: &mut I
+    ) -> MODE::Result<Self::Error, Self::Message, Self::Output> where
+        MODE: ParseMode;
 
     // COMBINATOR METHODS
 
@@ -116,22 +120,21 @@ pub const fn optional<E, I, O, P>(parser: P)-> impl Parser<I, Error = E, Output 
     I: Input,
     P: Parser<I, Output = O, Error = E>,
 {
-    mapped(parser, |result| match result {
-        Success (output, errors) => Success (Some (output), errors),
-        Failure (_) => Success(None, vec![])
-    })
+    todo!()
 }
 
 
 /// Maps the result type of a parser into a new type using a mapper function
-pub const fn mapped<EA, EB, I, M, OA, OB, P>(
+pub const fn mapped<EA, EB, F, I, OA, OB, MA, MB, P, RA, RB>(
     parser: P,
-    mapper: M
+    f: F
 ) -> impl Parser<I, Error = EB, Output = OB> where
     I: Input,
-    M: Fn(ParseResult<OA, EA>) -> ParseResult<OB, EB>,
+    F: Fn(RA) -> RB,
     P: Parser<I, Error = EA, Output = OA>,
-{ Mapped { mapper, parser } }
+    RA: ParseResult<EA, MA, OA>,
+    RB: ParseResult<EB, MB, OB>,
+{ Mapped { function: f, parser } }
 
 
 /// Applies a parser after an ignored prefix parser
