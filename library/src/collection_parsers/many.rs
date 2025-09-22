@@ -12,7 +12,7 @@ use crate::{
 };
 
 
-/// A combinator that applies one parser, then another, and then returns their outputs as a tuple
+/// A combinator that applies a parser repeatedly
 pub struct Many<P> {
     /// The maximum number of items that can be parsed
     pub maximum: Option<usize>,
