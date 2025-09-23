@@ -1,7 +1,7 @@
 // Copyright Rob Gage 2025
 
 mod choice;
-mod mapped;
+mod mapped_output;
 mod sequenced;
 
 use crate::{
@@ -10,7 +10,7 @@ use crate::{
     ParseResult,
 };
 use choice::Choice;
-use mapped::Mapped;
+use mapped_output::MappedOutput;
 use sequenced::Sequenced;
 
 /// Implementors can be parsed from an input type
@@ -134,7 +134,7 @@ pub const fn mapped<EA, EB, F, I, OA, OB, MA, MB, P, RA, RB>(
     P: Parser<I, Error = EA, Output = OA>,
     RA: ParseResult<EA, MA, OA>,
     RB: ParseResult<EB, MB, OB>,
-{ Mapped { function: f, parser } }
+{ MappedOutput { function: f, parser } }
 
 
 /// Applies a parser after an ignored prefix parser
