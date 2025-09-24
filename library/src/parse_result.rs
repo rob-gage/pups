@@ -1,25 +1,26 @@
 // Copyright Rob Gage 2025
 
-use std::marker::PhantomData;
+use crate::Mode;
 
-
-/// A results from applying parsers to input
-pub struct ParseResult<Error, Message, Output, MessageContainer = Vec<Message>> {
-    /// The internal `Result<O, E>` type
-    result: Result<Output, Error>,
-    /// Stores all the messages that have been accumulated by the parser
-    pub messages: MessageContainer,
-    _marker: PhantomData<Message>,
+/// A result produced by applying a parser to input
+pub enum ParseResult<Output, Error, Message, _Mode: Mode>
+{
+    /// Represents a failed parser application
+    Failure (_Mode::OutputForm<Output>, _Mode::MessageContainer<Message>),
+    /// Represents a successful parser application
+    Success (_Mode::ErrorForm<Error>, _Mode::MessageContainer<Message>),
 }
 
 
-impl<Error, Message, Output, MessageContainer>
-ParseResult<Error, Message, Output, MessageContainer> {
-
+impl<Output, Error, Message, _Mode> ParseResult<Output, Error, Message, _Mode>
+where
+    Self: Sized,
+    _Mode: Mode
+{
     /// Returns `true` if this `ParseResult` represents a failed parser application
-    pub fn is_failure(&self) -> bool { ! self.result.is_ok() }
+    pub const fn is_failure(&self) -> bool { matches!(self, ParseResult::Failure(..)) }
 
     /// Returns `true` if this `ParseResult` represents a successful parser application
-    pub fn is_success(&self) -> bool { self.result.is_ok() }
+    pub const fn is_success(&self) -> bool { matches!(self, ParseResult::Success(..)) }
 
 }

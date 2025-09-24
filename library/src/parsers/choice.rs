@@ -30,9 +30,9 @@ impl<E, I, O, P1, P2> Parser<I> for Choice<P1, P2> where
 
     type Output = O;
 
-    fn parse(&self, input: &mut I) -> ParseResult<O, E> {
-        match self.primary.parse(input) {
-            Failure (mut primary_errors) => match self.primary.parse(input) {
+    fn apply(&self, input: &mut I) -> ParseResult<O, E> {
+        match self.primary.apply(input) {
+            Failure (mut primary_errors) => match self.primary.apply(input) {
                 Failure (alternate_errors) => {
                     primary_errors.extend(alternate_errors);
                     Failure (primary_errors)

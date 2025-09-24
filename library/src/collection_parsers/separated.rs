@@ -55,11 +55,11 @@ impl<E, I, O1, O2, P1, P2> Parser<I> for Separated<P1, P2> where
 
     type Output = Vec<O1>;
 
-    fn parse(&self, input: &mut I) -> ParseResult<Self::Output, Self::Error> {
+    fn apply(&self, input: &mut I) -> ParseResult<Self::Output, Self::Error> {
         let cursor: usize = input.cursor();
         let maximum: usize = if let Some (maximum) = self.maximum { maximum } else { usize::MAX };
         let mut items: Vec<O1> = Vec::new();
-        let mut errors: Vec<E> = if maximum != 0 { match self.parser.parse(input) {
+        let mut errors: Vec<E> = if maximum != 0 { match self.parser.apply(input) {
             Failure (errors) => return Failure (errors),
             Success (item, errors) => {
                 items.push(item);
@@ -68,14 +68,14 @@ impl<E, I, O1, O2, P1, P2> Parser<I> for Separated<P1, P2> where
         }} else { return Success (vec![], vec![]) };
         while items.len() < maximum {
             let item_cursor: usize = input.cursor();
-            match self.separator.parse(input) {
+            match self.separator.apply(input) {
                 Failure (separator_errors) => return if items.len() < self.minimum {
                     input.set_cursor(cursor);
                     errors.extend(separator_errors);
                     Failure(errors)
                 } else { Success (items, errors) },
                 Success (_, separator_errors) => {
-                    match self.parser.parse(input) {
+                    match self.parser.apply(input) {
                         Failure (item_errors) => return if items.len() < self.minimum {
                             input.set_cursor(cursor);
                             errors.extend(separator_errors);

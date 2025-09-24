@@ -52,14 +52,14 @@ impl<E, I, O, P> Parser<I> for Many<P> where
 
     type Output = Vec<O>;
 
-    fn parse(&self, input: &mut I) -> ParseResult<Self::Output, Self::Error> {
+    fn apply(&self, input: &mut I) -> ParseResult<Self::Output, Self::Error> {
         let cursor: usize = input.cursor();
         let maximum: usize = if let Some (maximum) = self.maximum { maximum } else { usize::MAX };
         let mut items: Vec<O> = Vec::new();
         let mut errors: Vec<E> = Vec::new();
         while items.len() < maximum {
             let item_cursor: usize = input.cursor();
-            match self.parser.parse(input) {
+            match self.parser.apply(input) {
                 Failure(item_errors) => if items.len() < self.minimum {
                     input.set_cursor(cursor);
                     errors.extend(item_errors);

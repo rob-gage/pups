@@ -26,7 +26,7 @@ impl<I, T> Parser<I> for Keyword where
 
     type Output = ();
 
-    fn parse(&self, input: &mut I) -> ParseResult<Self::Output, Self::Error> {
+    fn apply(&self, input: &mut I) -> ParseResult<Self::Output, Self::Error> {
         if input.starts_with(&self.0) {
             input.skip_bytes(self.0.len());
             Success ((), vec![])

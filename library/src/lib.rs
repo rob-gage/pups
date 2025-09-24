@@ -2,12 +2,13 @@
 
 mod collection_parsers;
 mod input;
-mod parse_modes;
+mod modes;
 mod parse_result;
 mod parsers;
 
+use modes::*;
+
 pub use collection_parsers::*;
 pub use input::Input;
-pub use parse_modes::*;
-pub use parse_result::*;
+pub use parse_result::ParseResult;
 pub use parsers::*;
