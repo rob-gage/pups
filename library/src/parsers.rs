@@ -1,10 +1,9 @@
 // Copyright Rob Gage 2025
 
 mod choice;
-mod mapped;
+mod mappers;
 mod sequenced;
 
-use std::marker::PhantomData;
 use crate::{
     Check,
     Input,
@@ -13,7 +12,11 @@ use crate::{
     ParseResult,
 };
 use choice::Choice;
-use mapped::Mapped;
+use mappers::{
+    OutputMapper,
+    ErrorMapper,
+    MessageMapper,
+};
 use sequenced::Sequenced;
 
 /// Implementors can be parsed from an input type
@@ -34,10 +37,10 @@ pub trait Parser<I> where
     type Message: Sized;
 
     /// Applies a parser
-    fn apply<_Mode>(
+    fn apply<_Mode: Mode>(
         &self,
         input: &mut I
-    ) -> ParseResult<Self::Error, Self::Message, Self::Output, _Mode>;
+    ) -> ParseResult<Self::Output, Self::Error, Self::Message, _Mode>;
 
     /// Checks that the input matches this parser, and consumes matched input
     fn check(
@@ -51,7 +54,7 @@ pub trait Parser<I> where
     fn parse(
         &self,
         input: &mut I,
-    ) -> ParseResult<Self::Error, Self::Message, Self::Output, Parse> {
+    ) -> ParseResult<Self::Output, Self::Error, Self::Message, Parse> {
         self.apply::<Parse>(input)
     }
 
@@ -79,17 +82,30 @@ pub trait Parser<I> where
     // ) -> impl Parser<I, Error = Self::Error, Output = Option<Self::Output>>
     // { optional(self) }
 
-    // /// Maps a parser's output to another type using a function
-    // fn map<F, O>(
-    //     self,
-    //     f: F
-    // ) -> impl Parser<I, Error = Self::Error, Message = Self::Message, Output = O> where
-    //     F: Clone + Fn(Self::Output) -> O,
-    // {
-    //     // mapped(self, move |result| result.map(f.clone()))
-    //     unimplemented!()
-    // }
-    //
+    /// Maps a parser's output to another type using a function
+    fn map<F, O>(
+        self,
+        f: impl Fn(Self::Output) -> O + Clone
+    ) -> impl Parser<I, Output = O, Error = Self::Error, Message = Self::Message> {
+        OutputMapper { parser: self, function: f }
+    }
+
+    /// Maps a parser's error to another type using a function
+    fn map_error<F, E>(
+        self,
+        f: impl Fn(Self::Error) -> E + Clone
+    ) -> impl Parser<I, Output = Self::Output, Error = E, Message = Self::Message> {
+        ErrorMapper { parser: self, function: f }
+    }
+
+    /// Maps a parser's messages to another type using a function
+    fn map_messages<F, M>(
+        self,
+        f: impl Fn(Self::Message) -> M + Clone
+    ) -> impl Parser<I, Output = Self::Output, Error = Self::Error, Message = M> {
+        MessageMapper { parser: self, function: f }
+    }
+
     // /// Maps each of a parser's accumulated errors to a new type using a function
     // fn map_errors<F, E>(
     //     self,
@@ -180,3 +196,5 @@ pub trait Parser<I> where
 //     Sequenced { head: parser, tail: terminator }
 //         .map(|(output, _)| output)
 // }
+
+// implementation of `Parser` for mapper functions

@@ -8,7 +8,10 @@ use crate::ParseResult::{
 
 
 /// Implementors represent different modes that parsers run in, each accomplishing different goals
-pub trait Mode {
+pub trait Mode
+where
+    Self: Sized,
+{
 
     /// The representational form of a successful parser application in this mode
     type OutputForm<O>;
@@ -52,7 +55,7 @@ pub trait Mode {
     /// Combine two `Self::MessageContainer`s
     fn combine_message_containers<M>(
         a: &mut Self::MessageContainer<M>,
-        b: Self::MessageContainer<M>
+        b: impl Into<Self::MessageContainer<M>>
     );
 
 }
@@ -77,21 +80,21 @@ impl Mode for Check {
         result: ParseResult<OA, E, M, Self>,
         _: impl Fn(OA) -> OB,
     ) -> ParseResult<OB, E, M, Self> {
-        result
+        if result.is_success() {Success((), ()) } else { Failure((), ()) }
     }
 
     fn map_error<O, EA, EB, M>(
         result: ParseResult<O, EA, M, Self>,
         _: impl Fn(EA) -> EB,
     ) -> ParseResult<O, EB, M, Self> {
-        result
+        if result.is_success() {Success((), ()) } else { Failure((), ()) }
     }
 
     fn map_messages<O, E, MA, MB>(
         result: ParseResult<O, E, MA, Self>,
         _: impl Fn(MA) -> MB,
     ) -> ParseResult<O, E, MB, Self> {
-        result
+        if result.is_success() {Success((), ()) } else { Failure((), ()) }
     }
 
     fn new_message_container<M>() -> () { () }
@@ -100,7 +103,7 @@ impl Mode for Check {
 
     fn combine_message_containers<M>(
         _: &mut Self::MessageContainer<M>,
-        _: Self::MessageContainer<M>
+        _: impl Into<Self::MessageContainer<M>>
     ) { }
 
 }
@@ -161,7 +164,7 @@ impl Mode for Parse {
 
     fn combine_message_containers<M>(
         a: &mut Self::MessageContainer<M>,
-        b: Self::MessageContainer<M>
-    ) { a.extend(b); }
+        b: impl Into<Self::MessageContainer<M>>
+    ) { a.extend(b.into()); }
 
 }

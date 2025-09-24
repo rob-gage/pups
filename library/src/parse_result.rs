@@ -8,9 +8,9 @@ where
     _Mode: Mode,
 {
     /// Represents a successful parser application
-    Success (_Mode::ErrorForm<Error>, _Mode::MessageContainer<Message>),
+    Success (_Mode::OutputForm<Output>, _Mode::MessageContainer<Message>),
     /// Represents a failed parser application
-    Failure (_Mode::OutputForm<Output>, _Mode::MessageContainer<Message>),
+    Failure (_Mode::ErrorForm<Error>, _Mode::MessageContainer<Message>),
 }
 
 
