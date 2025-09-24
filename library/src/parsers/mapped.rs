@@ -2,8 +2,6 @@
 
 use crate::{
     Input,
-    Parse,
-    Mode,
     ParseResult,
     Parser
 };
@@ -18,25 +16,15 @@ pub struct Mapped<F, P> {
 }
 
 
-impl<CA, CB, EA, EB, MA, MB, OA, OB, F, I, P, ModeA, ModeB> Parser<I> for Mapped<F, P> where
-    F: Fn(ParseResult<EA, MA, OA, ModeA>) -> ParseResult<EB, MB, OB, ModeB>,
+impl<EA, EB, F, I, MA, MB, P, OA, OB> Parser<I> for Mapped<F, P> where
+    F: Fn(ParseResult<OA, EA>) -> ParseResult<OB, EB>,
     I: Input,
-    P: Parser<I, Error = EA, Message = MA, Output = OA>,
+    P: Parser<I, Error = EA, Output = OA>,
 {
 
     type Error = EB;
 
-    type Message = ModeB;
-
     type Output = OB;
 
-    fn apply<Mode>(
-        &self,
-        input: &mut I
-    ) -> ParseResult<EB, MB, OB, Mode> where
-        Mode: Mode<EB, MB, OB>
-    {
-        (Mode::apply_parser(self.parser, input))
-    }
 
 }

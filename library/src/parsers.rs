@@ -24,14 +24,14 @@ pub trait Parser<I> where
 
     // PARSER IMPLEMENTATION
 
+    /// The output type that is parsed by this parser
+    type Output: Sized;
+
     /// The type for errors that can occur with this parser
     type Error: Sized;
 
     /// The type for messages that may be returned by this parser
     type Message: Sized;
-
-    /// The output type that is parsed by this parser
-    type Output: Sized;
 
     /// Applies a parser
     fn apply<_Mode>(
