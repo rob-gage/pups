@@ -3,6 +3,7 @@
 mod choice;
 mod mappers;
 mod sequenced;
+mod optional;
 
 use crate::{
     Check,
@@ -17,6 +18,7 @@ use mappers::{
     ErrorMapper,
     MessageMapper,
 };
+use optional::Optional;
 use sequenced::Sequenced;
 
 /// Implementors can be parsed from an input type
@@ -79,6 +81,13 @@ where
         P: Parser<I, Output = Self::Output, Error = E, Message = Self::Message>
     {  Choice { primary: self, alternate } }
 
+    /// Applies a parser optionally, returning `None` instead of an error if it fails
+    fn or_not(self) -> impl Parser<
+        I,
+        Output = Option<Self::Output>,
+        Error = Self::Error,
+        Message = Self::Message
+    > { Optional (self) }
 
     /// Maps a parser's output to another type using a function
     fn map<O>(
