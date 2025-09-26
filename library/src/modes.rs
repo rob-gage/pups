@@ -35,11 +35,18 @@ where
         function: impl Fn(OA1, OA2) -> OB,
     ) -> Self::OutputForm<OB>;
 
+    /// Merges two error types into one using a function
+    fn merge_errors<EA1, EA2, EB>(
+        error_1: Self::ErrorForm<EA1>,
+        error_2: Self::ErrorForm<EA2>,
+        function: impl Fn(EA1, EA2) -> EB,
+    ) -> Self::ErrorForm<EB>;
+
     /// Combine two `Self::MessageContainer`s
     fn merge_message_containers<M>(
-        a: &mut Self::MessageContainer<M>,
+        a: Self::MessageContainer<M>,
         b: impl Into<Self::MessageContainer<M>>
-    );
+    ) -> Self::MessageContainer<M>;
 
     /// Maps a result's output type to another type in this mode
     fn map_output<OA, OB, E, M>(
@@ -89,10 +96,16 @@ impl Mode for Check {
         _: impl Fn(OA1, OA2) -> OB
     ) -> Self::OutputForm<OB> { () }
 
+    fn merge_errors<EA1, EA2, EB>(
+        _: (),
+        _: (),
+        _: impl Fn(EA1, EA2) -> EB,
+    ) -> Self::ErrorForm<EB> { () }
+
     fn merge_message_containers<M>(
-        _: &mut Self::MessageContainer<M>,
+        _: Self::MessageContainer<M>,
         _: impl Into<Self::MessageContainer<M>>
-    ) { }
+    ) { () }
 
     fn map_output<OA, OB, E, M>(
         result: ParseResult<OA, E, M, Self>,
@@ -143,10 +156,20 @@ impl Mode for Parse {
         function: impl Fn(OA1, OA2) -> OB
     ) -> OB { Self::convert_output(function(output_1, output_2)) }
 
+    fn merge_errors<EA1, EA2, EB>(
+        error_1: EA1,
+        error_2: EA2,
+        function: impl Fn(EA1, EA2) -> EB
+    ) -> EB { Self::convert_error(function(error_1, error_2)) }
+
     fn merge_message_containers<M>(
-        a: &mut Self::MessageContainer<M>,
-        b: impl Into<Self::MessageContainer<M>>
-    ) { a.extend(b.into()); }
+        a: Vec<M>,
+        b: impl Into<Vec<M>>
+    ) -> Vec<M> {
+        let mut a: Vec<M> = a;
+        a.extend(b.into());
+        a
+    }
 
     fn map_output<OA, OB, E, M>(
         result: ParseResult<OA, E, M, Self>,

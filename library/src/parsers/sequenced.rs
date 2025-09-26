@@ -36,21 +36,22 @@ impl<E, I, M, O1, O2, P1, P2> Parser<I> for Sequenced<P1, P2> where
     ) -> ParseResult<(O1, O2), E, M, _Mode> {
         let cursor = input.cursor();
         match self.head.apply::<_Mode>(input) {
-            Success (head_output, mut head_messages) => match self.tail.apply::<_Mode>(input) {
+            Success (head_output, head_messages) => match self.tail.apply::<_Mode>(input) {
                 Success (tail_output, tail_messages) => {
-                    _Mode::merge_message_containers(&mut head_messages, tail_messages);
                     Success (
                         _Mode::merge_outputs::<O1, O2, (O1, O2)>(
                             head_output,
                             tail_output,
                             |h, t| (h, t)),
-                        head_messages,
+                        _Mode::merge_message_containers(head_messages, tail_messages),
                     )
                 }
                 Failure (tail_error, tail_messages) => {
                     input.set_cursor(cursor);
-                    _Mode::merge_message_containers(&mut head_messages, tail_messages);
-                    Failure (tail_error, head_messages)
+                    Failure (
+                        tail_error,
+                        _Mode::merge_message_containers(head_messages, tail_messages)
+                    )
                 }
             }
             Failure (head_error, head_messages) => Failure (head_error, head_messages),

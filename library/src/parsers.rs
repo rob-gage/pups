@@ -11,6 +11,7 @@ use crate::{
     Parse,
     ParseResult,
 };
+use choice::Choice;
 use mappers::{
     OutputMapper,
     ErrorMapper,
@@ -19,7 +20,8 @@ use mappers::{
 use sequenced::Sequenced;
 
 /// Implementors can be parsed from an input type
-pub trait Parser<I> where
+pub trait Parser<I>
+where
     Self: Sized,
     I: Input
 {
@@ -63,23 +65,20 @@ pub trait Parser<I> where
     fn ignore_then<P, O>(
         self,
         next: P
-    ) -> impl Parser<I, Output = O, Error = Self::Error, Message = Self::Message> where
+    ) -> impl Parser<I, Output = O, Error = Self::Error, Message = Self::Message>
+    where
         P: Parser<I, Output = O, Error = Self::Error, Message = Self::Message>
     { preceded(self, next) }
 
-    // /// Tries another parser if this one fails
-    // fn or<P>(
-    //     self,
-    //     alternative: P
-    // ) -> impl Parser<I, Error = Self::Error, Output = Self::Error> where
-    //     P: Parser<I, Error = Self::Error, Output = Self::Output>;
-    // { Choice { alternative, primary: self } }
+    /// Tries another parser if this one fails
+    fn or<P, E>(
+        self,
+        alternate: P
+    ) -> impl Parser<I, Output = Self::Output, Error = (Self::Error, E), Message = Self::Message>
+    where
+        P: Parser<I, Output = Self::Output, Error = E, Message = Self::Message>
+    {  Choice { primary: self, alternate } }
 
-    // /// Try a parser as optional
-    // fn or_not(
-    //     self
-    // ) -> impl Parser<I, Error = Self::Error, Output = Option<Self::Output>>
-    // { optional(self) }
 
     /// Maps a parser's output to another type using a function
     fn map<O>(
@@ -139,15 +138,6 @@ where
     P2: Parser<I, Output = O2, Error = E, Message = M>,
     P3: Parser<I, Output = O3, Error = E, Message = M>,
 { preceded(prefix, terminated(parser, terminator)) }
-
-
-// /// Applies a parser that becomes `Some (_)` when it works, and `None` when it doesn't
-// pub const fn optional<E, I, O, P>(parser: P)-> impl Parser<I, Error = E, Output = Option<O>> where
-//     I: Input,
-//     P: Parser<I, Output = O, Error = E>,
-// {
-//     todo!()
-// }
 
 
 /// Applies a parser after an ignored prefix parser
