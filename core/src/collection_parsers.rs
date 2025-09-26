@@ -7,6 +7,7 @@ use crate::{
     Input,
     Parser,
 };
+use many::Many;
 
 
 /// Implementors are parsers that return collections of items
@@ -24,13 +25,16 @@ pub trait CollectionParser<E, I, O> where
 }
 
 
-// /// Applies a parser repeatedly until it fails
-// pub const fn many<E, I, O, P>(parser: P)-> impl Parser<I, Error = E, Output = Vec<O>> where
-//     I: Input,
-//     P: Parser<I, Output = O, Error = E>,
-// { Many { maximum: None, minimum: 0, parser } }
-//
-//
+/// Applies a parser repeatedly until it fails
+pub const fn many<E, I, M, O, P>(
+    parser: P
+) -> impl Parser<I, Output = Vec<O>, Error = E, Message = M>
+where
+    I: Input,
+    P: Parser<I, Output = O, Error = E, Message = M>,
+{ Many { maximum: None, minimum: 0, parser } }
+
+
 // /// Applies a parser repeatedly until it fails while applying a separator parser between items
 // pub const fn separated<E, I, O1, O2, P1, P2>(
 //     parser: P1,
