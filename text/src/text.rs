@@ -1,12 +1,15 @@
 // Copyright Rob Gage 2025
 
-use crate::Character;
-use pups::Input;
+use crate::{
+    Character,
+    TextInput,
+};
+use pups_core::Input;
 use std::marker::PhantomData;
-use crate::text_input::TextInput;
 
 /// UTF-8 text that can be consumed by parsers
-pub struct Text<T = char> where
+pub struct Text<T = char>
+where
     T: Character
 {
     /// The buffer that stores the `Text`
@@ -17,7 +20,8 @@ pub struct Text<T = char> where
     _phantom_data: PhantomData<T>
 }
 
-impl<T> Input for Text<T> where
+impl<T> Input for Text<T>
+where
     T: Character
 {
 
@@ -38,7 +42,8 @@ impl<T> Input for Text<T> where
 
 }
 
-impl<T> TextInput for Text<T> where
+impl<T> TextInput for Text<T>
+where
     T: Character
 {
     fn starts_with(&self, string: &str) -> bool { self.buffer[self.byte_offset..].starts_with(string) }

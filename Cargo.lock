@@ -4,11 +4,18 @@ version = 4
 
 [[package]]
 name = "pups"
+version = "0.0.1"
+dependencies = [
+ "pups_core",
+]
+
+[[package]]
+name = "pups_core"
 version = "0.0.0"
 
 [[package]]
 name = "pups_text"
 version = "0.0.0"
 dependencies = [
- "pups",
+ "pups_core",
 ]
