@@ -23,10 +23,23 @@ where
     type MessageContainer<M>;
 
     /// Converts an output to its representational form in this mode
-    fn convert_output<O>(output: O) -> Self::OutputForm<O>;
+    fn convert_output<O>(output: impl Into<O>) -> Self::OutputForm<O>;
 
     /// Converts an error to its representational form in this mode
-    fn convert_error<E>(error: E) -> Self::ErrorForm<E>;
+    fn convert_error<E>(error: impl Into<E>) -> Self::ErrorForm<E>;
+
+    /// Merges two output types into one using a function
+    fn merge_outputs<OA1, OA2, OB>(
+        output_1: Self::OutputForm<OA1>,
+        output_2: Self::OutputForm<OA2>,
+        function: impl Fn(OA1, OA2) -> OB,
+    ) -> Self::OutputForm<OB>;
+
+    /// Combine two `Self::MessageContainer`s
+    fn merge_message_containers<M>(
+        a: &mut Self::MessageContainer<M>,
+        b: impl Into<Self::MessageContainer<M>>
+    );
 
     /// Maps a result's output type to another type in this mode
     fn map_output<OA, OB, E, M>(
@@ -52,12 +65,6 @@ where
     /// Adds a message to a `Self::MessageContainer`
     fn add_message_to_container<M>(container: &mut Self::MessageContainer<M>, message: M);
 
-    /// Combine two `Self::MessageContainer`s
-    fn combine_message_containers<M>(
-        a: &mut Self::MessageContainer<M>,
-        b: impl Into<Self::MessageContainer<M>>
-    );
-
 }
 
 
@@ -72,9 +79,20 @@ impl Mode for Check {
 
     type MessageContainer<M> = ();
 
-    fn convert_output<O>(_: O) -> () { () }
+    fn convert_output<O>(_: impl Into<O>) -> () { () }
 
-    fn convert_error<E>(_: E ) -> () { () }
+    fn convert_error<E>(_: impl Into<E> ) -> () { () }
+
+    fn merge_outputs<OA1, OA2, OB>(
+        _: (),
+        _: (),
+        _: impl Fn(OA1, OA2) -> OB
+    ) -> Self::OutputForm<OB> { () }
+
+    fn merge_message_containers<M>(
+        _: &mut Self::MessageContainer<M>,
+        _: impl Into<Self::MessageContainer<M>>
+    ) { }
 
     fn map_output<OA, OB, E, M>(
         result: ParseResult<OA, E, M, Self>,
@@ -101,11 +119,6 @@ impl Mode for Check {
 
     fn add_message_to_container<M>(_: &mut Self::MessageContainer<M>, _: M) {}
 
-    fn combine_message_containers<M>(
-        _: &mut Self::MessageContainer<M>,
-        _: impl Into<Self::MessageContainer<M>>
-    ) { }
-
 }
 
 
@@ -120,9 +133,20 @@ impl Mode for Parse {
 
     type MessageContainer<M> = Vec<M>;
 
-    fn convert_output<O>(output: O) -> O { output }
+    fn convert_output<O>(output: impl Into<O>) -> O { output.into() }
 
-    fn convert_error<E>(error: E) -> E  { error }
+    fn convert_error<E>(error: impl Into<E>) -> E  { error.into() }
+
+    fn merge_outputs<OA1, OA2, OB>(
+        output_1: OA1,
+        output_2: OA2,
+        function: impl Fn(OA1, OA2) -> OB
+    ) -> OB { Self::convert_output(function(output_1, output_2)) }
+
+    fn merge_message_containers<M>(
+        a: &mut Self::MessageContainer<M>,
+        b: impl Into<Self::MessageContainer<M>>
+    ) { a.extend(b.into()); }
 
     fn map_output<OA, OB, E, M>(
         result: ParseResult<OA, E, M, Self>,
@@ -161,10 +185,5 @@ impl Mode for Parse {
     fn add_message_to_container<M>(container: &mut Self::MessageContainer<M>, message: M) {
         container.push(message);
     }
-
-    fn combine_message_containers<M>(
-        a: &mut Self::MessageContainer<M>,
-        b: impl Into<Self::MessageContainer<M>>
-    ) { a.extend(b.into()); }
 
 }
