@@ -2,7 +2,7 @@
 
 [package]
 name = "pups_core"
-version = "0.0.0"
+version = "0.0.2"
 license = "MIT"
 description = "Pretty Understandable Parsers"
 readme = "../README.md"
