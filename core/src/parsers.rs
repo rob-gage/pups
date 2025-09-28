@@ -1,9 +1,10 @@
 // Copyright Rob Gage 2025
 
 mod choice;
+mod iterated;
 mod mappers;
-mod sequenced;
 mod optional;
+mod sequenced;
 
 use crate::{
     Check,
@@ -13,6 +14,7 @@ use crate::{
     ParseResult,
 };
 use choice::Choice;
+use iterated::Iterated;
 use mappers::{
     OutputMapper,
     ErrorMapper,
@@ -128,6 +130,7 @@ where
         next: P
     ) -> impl Parser<I, Output = Self::Output, Error = Self::Error, Message = Self::Message>
     where
+        I: Input,
         P: Parser<I, Output = O, Error = Self::Error, Message = Self::Message>
     { terminated(self, next) }
 
@@ -149,6 +152,16 @@ where
 { preceded(prefix, terminated(parser, terminator)) }
 
 
+/// Iterates application of a parser
+pub const fn many<E, I, M, O1, O2, P1, P2>(
+    parser: P1,
+) -> impl Parser<I, Output = Vec<O1>, Error = E, Message = M> where
+    I: Input,
+    P1: Parser<I, Output = O1, Error = E, Message = M>,
+    P2: Parser<I, Output = O2, Error = E, Message = M>,
+{ Iterated::<P1, P2> { maximum: None, minimum: 0, parser, separator: None } }
+
+
 /// Applies a parser after an ignored prefix parser
 pub fn preceded<E, I, M, O1, O2, P1, P2>(
     prefix: P1,
@@ -161,6 +174,17 @@ pub fn preceded<E, I, M, O1, O2, P1, P2>(
     Sequenced { head: prefix, tail: parser }
         .map(|(_, tail)| tail)
 }
+
+
+/// Iterates application of a parser separated by application of another parser
+pub const fn separated<E, I, M, O1, O2, P1, P2>(
+    parser: P1,
+    separator: P2
+) -> impl Parser<I, Output = Vec<O1>, Error = E, Message = M> where
+    I: Input,
+    P1: Parser<I, Output = O1, Error = E, Message = M>,
+    P2: Parser<I, Output = O2, Error = E, Message = M>,
+{ Iterated { maximum: None, minimum: 0, parser, separator: Some(separator) } }
 
 
 /// Applies a parser followed by an ignored terminator parser
