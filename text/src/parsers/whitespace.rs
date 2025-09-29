@@ -1,7 +1,7 @@
 // Copyright Rob Gage 2025
 
 use crate::Character;
-use pups::Input;
+use pups_core::Input;
 
 /// Parses whitespace
 pub fn whitespace<I, T>(input: &mut I) -> Result<String, ()> where

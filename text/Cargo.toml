@@ -10,3 +10,4 @@ repository = "https://github.com/rob-gage/pups"
 edition = "2021"
 
 [dependencies]
+pups_core = { version = "0.0.2", path = "../core" }

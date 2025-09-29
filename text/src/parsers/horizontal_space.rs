@@ -1,7 +1,7 @@
 // Copyright Rob Gage 2025
 
 use crate::Character;
-use pups::Input;
+use pups_core::Input;
 
 /// Parses whitespace not counting newlines
 pub fn horizontal_space<I, T>(input: &mut I) -> Result<String, ()> where

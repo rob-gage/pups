@@ -12,3 +12,10 @@ dependencies = [
 [[package]]
 name = "pups_core"
 version = "0.0.2"
+
+[[package]]
+name = "pups_text"
+version = "0.0.0"
+dependencies = [
+ "pups_core",
+]
