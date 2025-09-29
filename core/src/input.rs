@@ -6,19 +6,11 @@ pub trait Input {
     /// The type of item that is stored in the `Input`
     type Item;
 
-    /// Advances the cursor by one position
-    fn advance(&mut self) { self.set_cursor(self.cursor() + 1) }
-
     /// Returns the cursor position in this `Input`
     fn cursor(&self) -> usize;
 
     /// Returns the next `Self::Item` in `Self` if it exists and advances the cursor
-    fn next(&mut self) -> Option<Self::Item> {
-        if let Some (item) = self.peek() {
-            self.advance();
-            Some (item)
-        } else { None }
-    }
+    fn next(&mut self) -> Option<Self::Item>;
 
     /// Returns the next `Self::Item` in `Self` if it exists
     fn peek(&self) -> Option<Self::Item>;

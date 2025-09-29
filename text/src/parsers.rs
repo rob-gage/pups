@@ -1,16 +1,23 @@
 // Copyright Rob Gage 2025
 
-mod horizontal_space;
 mod newline;
 mod token;
-mod whitespace;
 
 use crate::TextInput;
 use pups_core::{
     Input,
     Parser,
 };
+use newline::Newline;
 use token::Token;
+use crate::character::Character;
+
+/// Parses a single newline character
+pub const fn newline<C, I>() -> impl Parser<I, Output = C, Error = (), Message = ()>
+where
+    C: Character,
+    I: Input<Item = C> + TextInput,
+{ Newline }
 
 /// Parses a given lexeme from text
 pub const fn token<I>(

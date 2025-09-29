@@ -1,13 +1,45 @@
 // Copyright Rob Gage 2025
 
-use crate::Character;
-use pups_core::Input;
+use crate::{
+    Character,
+    TextInput
+};
+use pups_core::{
+    Input,
+    Mode,
+    ParseResult::{
+        self,
+        Failure,
+        Success,
+    },
+    Parser
+};
 
-/// Parses a newline
-pub fn newline<I, T>(input: &mut I) -> Result<(), ()> where
-    I: Input<Item = T>,
-    T: Character,
+/// Parses a lexical token
+pub struct Newline;
+
+impl<C, I> Parser<I> for Newline
+where
+    C: Character,
+    I: Input<Item = C> + TextInput,
 {
-    let character: T = input.peek().ok_or(())?;
-    if character.is_newline() { input.advance(); Ok (()) } else { Err (()) }
+    type Output = C;
+
+    type Error = ();
+
+    type Message = ();
+
+    fn apply<_Mode: Mode>(
+        &self,
+        input: &mut I
+    ) -> ParseResult<C, (), (), _Mode> {
+        let cursor: usize = input.cursor();
+        if let Some (character) = input.next() && character.is_newline() {
+            Success (_Mode::convert_output(character), _Mode::new_message_container())
+        } else {
+            input.set_cursor(cursor);
+            Failure (_Mode::convert_error(()), _Mode::new_message_container())
+        }
+    }
+
 }
