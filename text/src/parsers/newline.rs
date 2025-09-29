@@ -23,7 +23,7 @@ where
     C: Character,
     I: Input<Item = C> + TextInput,
 {
-    type Output = C;
+    type Output = ();
 
     type Error = ();
 
@@ -32,10 +32,10 @@ where
     fn apply<_Mode: Mode>(
         &self,
         input: &mut I
-    ) -> ParseResult<C, (), (), _Mode> {
+    ) -> ParseResult<(), (), (), _Mode> {
         let cursor: usize = input.cursor();
         if let Some (character) = input.next() && character.is_newline() {
-            Success (_Mode::convert_output(character), _Mode::new_message_container())
+            Success (_Mode::convert_output(()), _Mode::new_message_container())
         } else {
             input.set_cursor(cursor);
             Failure (_Mode::convert_error(()), _Mode::new_message_container())

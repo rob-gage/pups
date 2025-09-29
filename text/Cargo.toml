@@ -11,3 +11,4 @@ edition = "2024"
 
 [dependencies]
 pups_core = { version = "0.0.2", path = "../core" }
+unicode-ident = "1.0.19"

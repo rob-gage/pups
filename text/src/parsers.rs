@@ -3,6 +3,7 @@
 mod newline;
 mod token;
 mod whitespace;
+mod unicode_identifier;
 
 use crate::{
     Character,
@@ -15,10 +16,10 @@ use pups_core::{
 use newline::Newline;
 use token::Token;
 use whitespace::Whitespace;
-
+use crate::parsers::unicode_identifier::UnicodeIdentifier;
 
 /// Parses a single newline character
-pub const fn newline<C, I>() -> impl Parser<I, Output = C, Error = (), Message = ()>
+pub const fn newline<C, I>() -> impl Parser<I, Output = (), Error = (), Message = ()>
 where
     C: Character,
     I: Input<Item = C> + TextInput,
@@ -34,8 +35,16 @@ where
 { Token (lexeme) }
 
 
+/// Parses a unicode identifier
+pub const fn unicode_identifier<C, I>() -> impl Parser<I, Output = String, Error = (), Message = ()>
+where
+    C: Character,
+    I: Input<Item = C> + TextInput,
+{ UnicodeIdentifier }
+
+
 /// Parses whitespace
-pub const fn whitespace<C, I>() -> impl Parser<I, Output = Vec<C>, Error = (), Message = ()>
+pub const fn whitespace<C, I>() -> impl Parser<I, Output = String, Error = (), Message = ()>
 where
     C: Character,
     I: Input<Item = C> + TextInput,
