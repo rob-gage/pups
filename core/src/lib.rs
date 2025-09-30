@@ -7,7 +7,13 @@ mod parsers;
 
 use modes::*;
 
+pub mod prelude {
+    pub use crate::{
+        parse_result::ParseResult,
+        parsers::*,
+    };
+}
+
+pub use prelude::*;
 pub use modes::Mode;
 pub use input::Input;
-pub use parse_result::ParseResult;
-pub use parsers::*;
