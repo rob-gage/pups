@@ -35,26 +35,19 @@ impl<E1, E2, I, M, O, P1, P2> Parser<I> for Choice<P1, P2> where
 
     fn apply<_Mode: Mode>(&self, input: &mut I) -> ParseResult<O, (E1, E2), M, _Mode> {
         match self.primary.apply::<_Mode>(input) {
-            Failure (primary_error, primary_messages) =>
-                match self.alternate.apply::<_Mode>(input) {
-                    Failure (alternate_error, alternate_messages) => {
-                        Failure (
-                            _Mode::merge_errors(
-                                primary_error,
-                                alternate_error,
-                                |p, a| (p, a)
-                            ),
-                            _Mode::merge_message_containers(primary_messages, alternate_messages)
-                        )
-                    }
-                    Success (output, alternate_messages) => {
-                        Success (
-                            output,
-                            _Mode::merge_message_containers(primary_messages, alternate_messages)
-                        )
-                    }
-                }
             Success (output, messages) => Success (output, messages),
+            Failure (primary_error, _) =>
+                match self.alternate.apply::<_Mode>(input) {
+                    Success (output, alternate_messages) => Success (output, alternate_messages),
+                    Failure (alternate_error, alternate_messages) => Failure (
+                        _Mode::merge_errors(
+                            primary_error,
+                            alternate_error,
+                            |p, a| (p, a)
+                        ),
+                        alternate_messages
+                    )
+                }
         }
     }
 
