@@ -1,0 +1,39 @@
+// Copyright Rob Gage 2025
+
+use crate::{
+    Input,
+    Mode,
+    ParseResult::{
+        self,
+        Failure,
+        Success,
+    },
+    Parser,
+};
+
+
+/// Requires that there be no input remaining
+pub struct End;
+
+impl<I> Parser<I> for End
+where
+    I: Input,
+{
+
+    type Output = ();
+
+    type Error = ();
+
+    type Message = ();
+
+    fn apply<_Mode: Mode>(&self, input: &mut I) -> ParseResult<(), (), (), _Mode> {
+        if input.peek().is_some() {  Failure (
+            _Mode::convert_error(()),
+            _Mode::new_message_container()
+        )} else { Success (
+            _Mode::convert_output(()),
+            _Mode::new_message_container()
+        )}
+    }
+
+}

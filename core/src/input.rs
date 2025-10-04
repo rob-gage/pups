@@ -9,13 +9,13 @@ pub trait Input {
     /// Returns the cursor position in this `Input`
     fn cursor(&self) -> usize;
 
+    /// Sets the cursor to a new position
+    fn set_cursor(&mut self, position: usize);
+
     /// Returns the next `Self::Item` in `Self` if it exists and advances the cursor
     fn next(&mut self) -> Option<Self::Item>;
 
     /// Returns the next `Self::Item` in `Self` if it exists
     fn peek(&self) -> Option<Self::Item>;
-
-    /// Sets the cursor to a new position
-    fn set_cursor(&mut self, position: usize);
 
 }

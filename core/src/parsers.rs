@@ -1,6 +1,7 @@
 // Copyright Rob Gage 2025
 
 mod choice;
+mod end;
 mod iterated;
 mod mappers;
 mod optional;
@@ -14,6 +15,7 @@ use crate::{
     ParseResult,
 };
 use choice::Choice;
+use end::End;
 use iterated::Iterated;
 use mappers::{
     OutputMapper,
@@ -150,6 +152,14 @@ where
     P2: Parser<I, Output = O2, Error = E, Message = M>,
     P3: Parser<I, Output = O3, Error = E, Message = M>,
 { preceded(prefix, terminated(parser, terminator)) }
+
+
+/// Matches the end of the provided input
+pub fn end<O, E, M, I, P>() -> impl Parser<I, Output = (), Error = (), Message = ()>
+where
+    I: Input,
+    P: Parser<I, Output = O, Error = E, Message = M>
+{ End }
 
 
 /// Iterates application of a parser
