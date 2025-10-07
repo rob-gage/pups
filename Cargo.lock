@@ -4,7 +4,7 @@ version = 4
 
 [[package]]
 name = "pups"
-version = "0.0.4"
+version = "0.0.5"
 dependencies = [
  "pups_core",
  "pups_text",
@@ -12,11 +12,11 @@ dependencies = [
 
 [[package]]
 name = "pups_core"
-version = "0.0.4"
+version = "0.0.5"
 
 [[package]]
 name = "pups_text"
-version = "0.0.4"
+version = "0.0.5"
 dependencies = [
  "pups_core",
  "unicode-ident",
