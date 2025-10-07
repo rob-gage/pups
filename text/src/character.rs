@@ -1,5 +1,6 @@
 /// Copyright Rob Gage 2025
 
+use pups_core::{Input, Mode, ParseResult, Parser};
 use unicode_ident::{
     is_xid_continue,
     is_xid_start
@@ -36,7 +37,10 @@ pub trait Character where
 
 }
 
+
 impl Character for char {
+
+    fn next_in(string: &str) -> Option<Self> { string.chars().next() }
 
     fn is_ascii_decimal(&self) -> bool { self.is_ascii_digit() }
 
@@ -56,12 +60,10 @@ impl Character for char {
 
     fn length(&self) -> usize { self.len_utf8() }
 
-    fn next_in(string: &str) -> Option<Self> { string.chars().next() }
-
-    fn write(&self, buffer: &mut String) { buffer.push(*self) }
-
     fn is_unicode_identifier_start(&self) -> bool { is_xid_start(*self) }
 
     fn is_unicode_identifier_continuation(&self) -> bool { is_xid_continue(*self) }
+
+    fn write(&self, buffer: &mut String) { buffer.push(*self) }
 
 }

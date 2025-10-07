@@ -14,6 +14,6 @@ pub mod prelude {
     };
 }
 
+pub use input::Input;
 pub use prelude::*;
 pub use modes::Mode;
-pub use input::Input;
