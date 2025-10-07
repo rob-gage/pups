@@ -2,6 +2,7 @@
 
 mod choice;
 mod end;
+mod first_match;
 mod iterated;
 mod mappers;
 mod optional;
@@ -15,8 +16,10 @@ use crate::{
     Parse,
     ParseResult,
 };
+
 use choice::Choice;
 use end::End;
+use first_match::FirstMatch;
 use iterated::Iterated;
 use mappers::{
     OutputMapper,
@@ -26,6 +29,7 @@ use mappers::{
 use optional::Optional;
 use recoverable::Recoverable;
 use sequenced::Sequenced;
+
 
 /// Implementors can be parsed from an input type
 pub trait Parser<I>
@@ -96,12 +100,10 @@ where
     {  Choice { primary: self, alternate } }
 
     /// Applies a parser optionally, returning `None` instead of an error if it fails
-    fn or_not(self) -> impl Parser<
-        I,
-        Output = Option<Self::Output>,
-        Error = Self::Error,
-        Message = Self::Message
-    > { Optional (self) }
+    fn or_not(
+        self
+    ) -> impl Parser<I, Output = Option<Self::Output>, Error = Self::Error, Message = Self::Message>
+    { optional(self) }
 
     /// Maps a parser's output to another type using a function
     fn map<O>(
@@ -180,6 +182,24 @@ pub const fn many<E, I, M, O1, O2, P1, P2>(
     P1: Parser<I, Output = O1, Error = E, Message = M>,
     P2: Parser<I, Output = O2, Error = E, Message = M>,
 { Iterated::<P1, P2> { maximum: None, minimum: 0, parser, separator: None } }
+
+
+/// Optionally applies a parser, converting a failure into `Option::None`
+pub const fn optional<O, E, M, I, P>(
+    parser: P,
+) -> impl Parser<I, Output = Option<O>, Error = E, Message = M> where
+    I: Input,
+    P: Parser<I, Output = O, Error = E, Message = M>,
+{ Optional (parser) }
+
+
+/// Consumes input until a parser can be applied successfully or there is no input left
+pub const fn seek<O, E, M, I, P>(
+    parser: P,
+) -> impl Parser<I, Output = Option<O>, Error = E, Message = M> where
+    I: Input,
+    P: Parser<I, Output = O, Error = E, Message = M>,
+{ FirstMatch (parser) }
 
 
 /// Applies a parser after an ignored prefix parser

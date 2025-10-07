@@ -11,7 +11,7 @@ pub trait Character where
 {
 
     /// Returns the next `Character` from a given string slice
-    fn next(string: &str) -> Option<Self>;
+    fn next_in(string: &str) -> Option<Self>;
 
     /// Returns `true` if this `Character` is an ASCII decimal digit
     fn is_ascii_decimal(&self) -> bool;
@@ -56,7 +56,7 @@ impl Character for char {
 
     fn length(&self) -> usize { self.len_utf8() }
 
-    fn next(string: &str) -> Option<Self> { string.chars().next() }
+    fn next_in(string: &str) -> Option<Self> { string.chars().next() }
 
     fn write(&self, buffer: &mut String) { buffer.push(*self) }
 
