@@ -29,7 +29,7 @@ where
 /// Parses a given lexeme from text
 pub const fn token<I>(
     lexeme: &'static str
-) -> impl Parser<I, Output = String, Error = (), Message = ()>
+) -> impl Parser<I, Output = &'static str, Error = (), Message = ()>
 where
     I: Input + TextInput,
 { Token (lexeme) }

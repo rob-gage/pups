@@ -1,9 +1,6 @@
 // Copyright Rob Gage 2025
 
-use crate::{
-    Character,
-    TextInput
-};
+use crate::TextInput;
 use pups_core::{
     Input,
     Mode,
@@ -22,7 +19,7 @@ impl<I> Parser<I> for Token
 where
     I: Input + TextInput,
 {
-    type Output = String;
+    type Output = &'static str;
 
     type Error = ();
 
@@ -31,9 +28,9 @@ where
     fn apply<_Mode: Mode>(
         &self,
         input: &mut I
-    ) -> ParseResult<String, (), (), _Mode> {
+    ) -> ParseResult<&'static str, (), (), _Mode> {
         if input.starts_with(self.0) {
-            Success (_Mode::convert_output(self.0.to_string()), _Mode::new_message_container())
+            Success (_Mode::convert_output(self.0), _Mode::new_message_container())
         } else {
             Failure (_Mode::convert_error(()), _Mode::new_message_container())
         }
