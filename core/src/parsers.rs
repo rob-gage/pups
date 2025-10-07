@@ -5,6 +5,7 @@ mod end;
 mod iterated;
 mod mappers;
 mod optional;
+mod recoverable;
 mod sequenced;
 
 use crate::{
@@ -23,6 +24,7 @@ use mappers::{
     MessageMapper,
 };
 use optional::Optional;
+use recoverable::Recoverable;
 use sequenced::Sequenced;
 
 /// Implementors can be parsed from an input type
@@ -53,19 +55,27 @@ where
     fn check(
         &self,
         input: &mut I,
-    ) -> bool {
-        self.apply::<Check>(input).is_success()
-    }
+    ) -> bool
+    { self.apply::<Check>(input).is_success() }
 
     /// Checks that the input matches this parser, and consumes matched input
     fn parse(
         &self,
         input: &mut I,
-    ) -> ParseResult<Self::Output, Self::Error, Self::Message, Parse> {
-        self.apply::<Parse>(input)
-    }
+    ) -> ParseResult<Self::Output, Self::Error, Self::Message, Parse>
+    { self.apply::<Parse>(input) }
 
     // COMBINATOR METHODS
+
+    /// If necessary, runs a fallback parser to recover from the failure of the original parser
+    /// while preserving all messages from the original parser
+    fn catch<P>(
+        self,
+        fallback: P
+    ) -> impl Parser<I, Output = Self::Output, Error = Self::Error, Message = Self::Message>
+    where
+        P: Parser<I, Output = Self::Output, Error = Self::Error, Message = Self::Message>
+    { Recoverable { fallback, parser: self } }
 
     /// Ignores this parser's result and then applies another
     fn ignore_then<P, O>(
