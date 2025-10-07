@@ -27,7 +27,15 @@ where
 
     type Item = T;
 
+    fn advance(&mut self) {
+        if let Some (character) = self.peek() {
+            self.byte_offset += character.length();
+        }
+    }
+
     fn cursor(&self) -> usize { self.byte_offset }
+
+    fn set_cursor(&mut self, cursor: usize) { self.byte_offset = cursor; }
 
     fn next(&mut self) -> Option<Self::Item> {
         if let Some (character) = self.peek() {
@@ -36,9 +44,7 @@ where
         } else { None }
     }
 
-    fn peek(&self) -> Option<Self::Item> { T::next(&self.buffer[self.byte_offset..]) }
-
-    fn set_cursor(&mut self, cursor: usize) { self.byte_offset = cursor; }
+    fn peek(&self) -> Option<Self::Item> { T::next_in(&self.buffer[self.byte_offset..]) }
 
 }
 

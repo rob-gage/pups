@@ -72,20 +72,17 @@ struct TestInput {
 }
 
 impl Input for TestInput {
+
     type Item = TestItem;
+
+    fn advance(&mut self) { self.cursor += 1; }
 
     fn cursor(&self) -> usize { self.cursor }
 
-    fn next(&mut self) -> Option<Self::Item> {
-        let item: TestItem = self.peek()?;
-        self.cursor += 1;
-        Some(item)
-    }
+    fn set_cursor(&mut self, position: usize) { self.cursor = position }
 
     fn peek(&self) -> Option<Self::Item> {
         self.items.get(self.cursor).map(|item| item.clone())
     }
-
-    fn set_cursor(&mut self, position: usize) { self.cursor = position }
 
 }
