@@ -3,7 +3,7 @@
 use crate::Mode;
 
 /// A result produced by applying a parser to input
-pub enum ParseResult<Output, Error, Message, _Mode>
+pub enum ModeResult<Output, Error, Message, _Mode>
 where
     _Mode: Mode,
 {
@@ -14,15 +14,15 @@ where
 }
 
 
-impl<Output, Error, Message, _Mode> ParseResult<Output, Error, Message, _Mode>
+impl<Output, Error, Message, _Mode> ModeResult<Output, Error, Message, _Mode>
 where
     _Mode: Mode
 {
 
     /// Returns `true` if this `ParseResult` represents a successful parser application
-    pub const fn is_success(&self) -> bool { matches!(self, ParseResult::Success(..)) }
+    pub const fn is_success(&self) -> bool { matches!(self, ModeResult::Success(..)) }
 
     /// Returns `true` if this `ParseResult` represents a failed parser application
-    pub const fn is_failure(&self) -> bool { matches!(self, ParseResult::Failure(..)) }
+    pub const fn is_failure(&self) -> bool { matches!(self, ModeResult::Failure(..)) }
 
 }

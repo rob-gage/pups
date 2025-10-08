@@ -3,7 +3,7 @@
 use crate::{
     Input,
     Mode,
-    ParseResult::{
+    ModeResult::{
         self,
         Failure,
         Success
@@ -54,7 +54,7 @@ where
     fn apply<_Mode: Mode>(
         &self,
         input: &mut I
-    ) -> ParseResult<Vec<O1>, E, M, _Mode> {
+    ) -> ModeResult<Vec<O1>, E, M, _Mode> {
         let start_cursor: usize = input.cursor();
         let maximum: usize = if let Some (maximum) = self.maximum { maximum } else { usize::MAX };
         let mut outputs: _Mode::OutputForm<Vec<O1>> = _Mode::convert_output(Vec::new());

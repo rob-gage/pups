@@ -3,7 +3,7 @@
 use crate::{
     Input,
     Mode,
-    ParseResult,
+    ModeResult,
     Parser
 };
 
@@ -31,7 +31,7 @@ impl<E, F, I, M, P, OA, OB> Parser<I> for OutputMapper<F, P> where
     fn apply<_Mode: Mode>(
         &self,
         input: &mut I
-    ) -> ParseResult<Self::Output, Self::Error, Self::Message, _Mode> {
+    ) -> ModeResult<Self::Output, Self::Error, Self::Message, _Mode> {
         _Mode::map_output(
             self.parser.apply::<_Mode>(input),
             self.function.clone()
@@ -65,7 +65,7 @@ impl<EA, EB, F, I, M, P, O> Parser<I> for ErrorMapper<F, P> where
     fn apply<_Mode: Mode>(
         &self,
         input: &mut I
-    ) -> ParseResult<Self::Output, Self::Error, Self::Message, _Mode> {
+    ) -> ModeResult<Self::Output, Self::Error, Self::Message, _Mode> {
         _Mode::map_error(
             self.parser.apply::<_Mode>(input),
             self.function.clone()
@@ -99,7 +99,7 @@ impl<E, F, I, MA, MB, P, O> Parser<I> for MessageMapper<F, P> where
     fn apply<_Mode: Mode>(
         &self,
         input: &mut I
-    ) -> ParseResult<Self::Output, Self::Error, Self::Message, _Mode> {
+    ) -> ModeResult<Self::Output, Self::Error, Self::Message, _Mode> {
         _Mode::map_messages(
             self.parser.apply::<_Mode>(input),
             self.function.clone()

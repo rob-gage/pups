@@ -3,7 +3,7 @@
 use crate::{
     Input,
     Mode,
-    ParseResult::{
+    ModeResult::{
         self,
         Failure,
         Success,
@@ -28,7 +28,7 @@ where
 
     type Message = M;
 
-    fn apply<_Mode: Mode>(&self, input: &mut I) -> ParseResult<Option<O>, E, M, _Mode> {
+    fn apply<_Mode: Mode>(&self, input: &mut I) -> ModeResult<Option<O>, E, M, _Mode> {
         while let Some(_) = input.peek() {
             match self.0.apply::<_Mode>(input) {
                 Failure (_, _) => input.advance(),

@@ -1,17 +1,23 @@
 // Copyright Rob Gage 2025
 
 mod input;
+mod mode_result;
 mod modes;
-mod parse_result;
 mod parsers;
 
-use modes::*;
-
 pub mod prelude {
+
     pub use crate::{
-        parse_result::ParseResult,
+        mode_result::ModeResult,
+        modes::{
+            Check,
+            Parse,
+        },
         parsers::*,
     };
+
+    type ParseResult<O, E = (), M = ()> = ModeResult<O, E, M, Parse>;
+
 }
 
 pub use input::Input;

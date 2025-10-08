@@ -4,7 +4,7 @@ use crate::TextInput;
 use pups_core::{
     Input,
     Mode,
-    ParseResult::{
+    ModeResult::{
         self,
         Failure,
         Success,
@@ -28,7 +28,7 @@ where
     fn apply<_Mode: Mode>(
         &self,
         input: &mut I
-    ) -> ParseResult<&'static str, (), (), _Mode> {
+    ) -> ModeResult<&'static str, (), (), _Mode> {
         if input.starts_with(self.0) {
             Success (_Mode::convert_output(self.0), _Mode::new_message_container())
         } else {

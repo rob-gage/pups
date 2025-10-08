@@ -3,7 +3,7 @@
 use crate::{
     Input,
     Mode,
-    ParseResult::{
+    ModeResult::{
         self,
         Failure,
         Success,
@@ -26,7 +26,7 @@ where
 
     type Message = ();
 
-    fn apply<_Mode: Mode>(&self, input: &mut I) -> ParseResult<(), (), (), _Mode> {
+    fn apply<_Mode: Mode>(&self, input: &mut I) -> ModeResult<(), (), (), _Mode> {
         if input.peek().is_some() {  Failure (
             _Mode::convert_error(()),
             _Mode::new_message_container()

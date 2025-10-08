@@ -3,7 +3,7 @@
 use crate::{
     Input,
     Mode,
-    ParseResult::{
+    ModeResult::{
         self,
         Failure,
         Success,
@@ -27,7 +27,7 @@ where
 
     type Message = M;
 
-    fn apply<_Mode: Mode>(&self, input: &mut I) -> ParseResult<Option<O>, E, M, _Mode> {
+    fn apply<_Mode: Mode>(&self, input: &mut I) -> ModeResult<Option<O>, E, M, _Mode> {
         match self.0.apply::<_Mode>(input) {
             success @ Success (..) => _Mode::map_output(success, |output| Some (output)),
             Failure (_, messages) => Success (_Mode::convert_output(None), messages)

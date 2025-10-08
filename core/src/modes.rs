@@ -2,7 +2,7 @@
 
 use crate::{
     Input,
-    ParseResult::{
+    ModeResult::{
         self,
         Failure,
         Success,
@@ -30,7 +30,7 @@ where
     fn apply_parser<O, E, M, I, P>(
         parser: P,
         input: &mut I,
-    ) -> ParseResult<O, E, M, Self>
+    ) -> ModeResult<O, E, M, Self>
     where
         I: Input,
         P: Parser<I, Output = O, Error = E, Message = M>;
@@ -63,21 +63,21 @@ where
 
     /// Maps a result's output type to another type in this mode
     fn map_output<OA, OB, E, M>(
-        result: ParseResult<OA, E, M, Self>,
+        result: ModeResult<OA, E, M, Self>,
         function: impl Fn(OA) -> OB,
-    ) -> ParseResult<OB, E, M, Self>;
+    ) -> ModeResult<OB, E, M, Self>;
 
     /// Maps a result's error type to another type in this mode
     fn map_error<O, EA, EB, M>(
-        result: ParseResult<O, EA, M, Self>,
+        result: ModeResult<O, EA, M, Self>,
         function: impl Fn(EA) -> EB,
-    ) -> ParseResult<O, EB, M, Self>;
+    ) -> ModeResult<O, EB, M, Self>;
 
     /// Maps a result's message type to another type in this mode
     fn map_messages<O, E, MA, MB>(
-        result: ParseResult<O, E, MA, Self>,
+        result: ModeResult<O, E, MA, Self>,
         function: impl Fn(MA) -> MB,
-    ) -> ParseResult<O, E, MB, Self>;
+    ) -> ModeResult<O, E, MB, Self>;
 
     /// Create a new empty `Self::MessageContainer`
     fn new_message_container<M>() -> Self::MessageContainer<M>;
@@ -99,7 +99,7 @@ impl Mode for Check {
 
     type MessageContainer<M> = ();
 
-    fn apply_parser<O, E, M, I, P>(parser: P, input: &mut I) -> ParseResult<O, E, M, Self>
+    fn apply_parser<O, E, M, I, P>(parser: P, input: &mut I) -> ModeResult<O, E, M, Self>
     where
         I: Input,
         P: Parser<I, Output = O, Error = E, Message = M>,
@@ -127,23 +127,23 @@ impl Mode for Check {
     ) { () }
 
     fn map_output<OA, OB, E, M>(
-        result: ParseResult<OA, E, M, Self>,
+        result: ModeResult<OA, E, M, Self>,
         _: impl Fn(OA) -> OB,
-    ) -> ParseResult<OB, E, M, Self> {
+    ) -> ModeResult<OB, E, M, Self> {
         if result.is_success() {Success((), ()) } else { Failure((), ()) }
     }
 
     fn map_error<O, EA, EB, M>(
-        result: ParseResult<O, EA, M, Self>,
+        result: ModeResult<O, EA, M, Self>,
         _: impl Fn(EA) -> EB,
-    ) -> ParseResult<O, EB, M, Self> {
+    ) -> ModeResult<O, EB, M, Self> {
         if result.is_success() {Success((), ()) } else { Failure((), ()) }
     }
 
     fn map_messages<O, E, MA, MB>(
-        result: ParseResult<O, E, MA, Self>,
+        result: ModeResult<O, E, MA, Self>,
         _: impl Fn(MA) -> MB,
-    ) -> ParseResult<O, E, MB, Self> {
+    ) -> ModeResult<O, E, MB, Self> {
         if result.is_success() {Success((), ()) } else { Failure((), ()) }
     }
 
@@ -165,7 +165,7 @@ impl Mode for Parse {
 
     type MessageContainer<M> = Vec<M>;
 
-    fn apply_parser<O, E, M, I, P>(parser: P, input: &mut I) -> ParseResult<O, E, M, Self>
+    fn apply_parser<O, E, M, I, P>(parser: P, input: &mut I) -> ModeResult<O, E, M, Self>
     where
         I: Input,
         P: Parser<I, Output=O, Error=E, Message=M>,
@@ -197,9 +197,9 @@ impl Mode for Parse {
     }
 
     fn map_output<OA, OB, E, M>(
-        result: ParseResult<OA, E, M, Self>,
+        result: ModeResult<OA, E, M, Self>,
         function: impl Fn(OA) -> OB,
-    ) -> ParseResult<OB, E, M, Self> {
+    ) -> ModeResult<OB, E, M, Self> {
         match result {
             Success (output, messages) => Success (function(output), messages),
             Failure (error, messages) => Failure (error, messages),
@@ -207,9 +207,9 @@ impl Mode for Parse {
     }
 
     fn map_error<O, EA, EB, M>(
-        result: ParseResult<O, EA, M, Self>,
+        result: ModeResult<O, EA, M, Self>,
         function: impl Fn(EA) -> EB,
-    ) -> ParseResult<O, EB, M, Self> {
+    ) -> ModeResult<O, EB, M, Self> {
         match result {
             Success (output, messages) => Success (output, messages),
             Failure (error, messages) => Failure (function(error), messages),
@@ -217,9 +217,9 @@ impl Mode for Parse {
     }
 
     fn map_messages<O, E, MA, MB>(
-        result: ParseResult<O, E, MA, Self>,
+        result: ModeResult<O, E, MA, Self>,
         function: impl Fn(MA) -> MB,
-    ) -> ParseResult<O, E, MB, Self> {
+    ) -> ModeResult<O, E, MB, Self> {
         match result {
             Success(output, messages) => Success(output, messages.into_iter()
                 .map(function).collect::<Vec<MB>>()),

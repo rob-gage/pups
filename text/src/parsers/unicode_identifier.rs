@@ -7,7 +7,7 @@ use crate::{
 use pups_core::{
     Input,
     Mode,
-    ParseResult::{
+    ModeResult::{
         self,
         Failure,
         Success,
@@ -32,7 +32,7 @@ where
     fn apply<_Mode: Mode>(
         &self,
         input: &mut I
-    ) -> ParseResult<String, (), (), _Mode> {
+    ) -> ModeResult<String, (), (), _Mode> {
         let cursor: usize = input.cursor();
         if let Some (character) = input.next() && character.is_unicode_identifier_start() {
             let mut identifier: _Mode::OutputForm<String> = _Mode::convert_output({

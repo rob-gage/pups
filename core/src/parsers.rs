@@ -14,7 +14,7 @@ use crate::{
     Input,
     Mode,
     Parse,
-    ParseResult,
+    ModeResult,
 };
 
 use choice::Choice;
@@ -53,20 +53,20 @@ where
     fn apply<_Mode: Mode>(
         &self,
         input: &mut I
-    ) -> ParseResult<Self::Output, Self::Error, Self::Message, _Mode>;
+    ) -> ModeResult<Self::Output, Self::Error, Self::Message, _Mode>;
 
     /// Checks that the input matches this parser, and consumes matched input
     fn check(
         &self,
         input: &mut I,
-    ) -> ParseResult<Self::Output, Self::Error, Self::Message, Check>
+    ) -> ModeResult<Self::Output, Self::Error, Self::Message, Check>
     { self.apply::<Check>(input) }
 
     /// Checks that the input matches this parser, and consumes matched input
     fn parse(
         &self,
         input: &mut I,
-    ) -> ParseResult<Self::Output, Self::Error, Self::Message, Parse>
+    ) -> ModeResult<Self::Output, Self::Error, Self::Message, Parse>
     { self.apply::<Parse>(input) }
 
     // COMBINATOR METHODS
@@ -153,7 +153,7 @@ where
 
 impl<O, E, M, F, I> Parser<I> for F
 where
-    F: Fn(&mut I) -> ParseResult<O, E, M, Parse>,
+    F: Fn(&mut I) -> ModeResult<O, E, M, Parse>,
     I: Input
 {
 
@@ -163,17 +163,17 @@ where
 
     type Message = M;
 
-    fn apply<_Mode: Mode>(&self, input: &mut I) -> ParseResult<O, E, M, _Mode> {
+    fn apply<_Mode: Mode>(&self, input: &mut I) -> ModeResult<O, E, M, _Mode> {
         _Mode::apply_parser(self, input)
     }
 
-    fn check(&self, input: &mut I) -> ParseResult<O, E, M, Check> {
+    fn check(&self, input: &mut I) -> ModeResult<O, E, M, Check> {
         if (self)(input).is_success() {
-            ParseResult::Success((), ())
-        } else { ParseResult::Failure((), ()) }
+            ModeResult::Success((), ())
+        } else { ModeResult::Failure((), ()) }
     }
 
-    fn parse(&self, input: &mut I) -> ParseResult<O, E, M, Parse> { self(input) }
+    fn parse(&self, input: &mut I) -> ModeResult<O, E, M, Parse> { self(input) }
 
 }
 

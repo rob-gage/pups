@@ -3,7 +3,7 @@
 use crate::{
     Input,
     Mode,
-    ParseResult::{
+    ModeResult::{
         self,
         Success,
         Failure,
@@ -33,7 +33,7 @@ impl<E, I, M, O1, O2, P1, P2> Parser<I> for Sequenced<P1, P2> where
     fn apply<_Mode: Mode>(
         &self,
         input: &mut I
-    ) -> ParseResult<(O1, O2), E, M, _Mode> {
+    ) -> ModeResult<(O1, O2), E, M, _Mode> {
         let cursor = input.cursor();
         match self.head.apply::<_Mode>(input) {
             Success (head_output, head_messages) => match self.tail.apply::<_Mode>(input) {

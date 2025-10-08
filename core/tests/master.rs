@@ -25,11 +25,11 @@ impl Parser<TestInput> for TestItem {
     fn apply<_Mode: Mode>(
         &self,
         input: &mut TestInput
-    ) -> ParseResult<TestItem, TestError, (), _Mode> {
+    ) -> ModeResult<TestItem, TestError, (), _Mode> {
         let cursor: usize = input.cursor();
         let Some(item) = input.next() else {
             input.set_cursor(cursor);
-            return ParseResult::Failure (
+            return ModeResult::Failure (
                 _Mode::convert_error(TestError {
                     encountered_item: None,
                     expected_item: self.clone(),
@@ -39,13 +39,13 @@ impl Parser<TestInput> for TestItem {
             )
         };
         if item == *self {
-            ParseResult::Success(
+            ModeResult::Success(
                 _Mode::convert_output(item),
                 _Mode::new_message_container()
             )
         } else {
             input.set_cursor(cursor);
-            ParseResult::Failure (
+            ModeResult::Failure (
                 _Mode::convert_error(TestError {
                     encountered_item: Some(item),
                     expected_item: self.clone(),
