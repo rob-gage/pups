@@ -16,7 +16,8 @@ pub mod prelude {
         parsers::*,
     };
 
-    type ParseResult<O, E = (), M = ()> = ModeResult<O, E, M, Parse>;
+    /// Shorthand result type for parsers
+    pub type ParseResult<O, E = (), M = ()> = ModeResult<O, E, M, Parse>;
 
 }
 
