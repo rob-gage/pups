@@ -1,9 +1,13 @@
 // Copyright Rob Gage 2025
 
-use crate::ParseResult::{
-    self,
-    Failure,
-    Success,
+use crate::{
+    Input,
+    ParseResult::{
+        self,
+        Failure,
+        Success,
+    },
+    Parser,
 };
 
 
@@ -21,6 +25,15 @@ where
 
     /// The representational form of stored messages used by this mode
     type MessageContainer<M>;
+
+    /// Applies a parser using this `Mode`
+    fn apply_parser<O, E, M, I, P>(
+        parser: P,
+        input: &mut I,
+    ) -> ParseResult<O, E, M, Self>
+    where
+        I: Input,
+        P: Parser<I, Output = O, Error = E, Message = M>;
 
     /// Converts an output to its representational form in this mode
     fn convert_output<O>(output: impl Into<O>) -> Self::OutputForm<O>;
@@ -86,6 +99,12 @@ impl Mode for Check {
 
     type MessageContainer<M> = ();
 
+    fn apply_parser<O, E, M, I, P>(parser: P, input: &mut I) -> ParseResult<O, E, M, Self>
+    where
+        I: Input,
+        P: Parser<I, Output = O, Error = E, Message = M>,
+    { parser.check(input) }
+
     fn convert_output<O>(_: impl Into<O>) -> () { () }
 
     fn convert_error<E>(_: impl Into<E> ) -> () { () }
@@ -145,6 +164,12 @@ impl Mode for Parse {
     type ErrorForm<E> = E;
 
     type MessageContainer<M> = Vec<M>;
+
+    fn apply_parser<O, E, M, I, P>(parser: P, input: &mut I) -> ParseResult<O, E, M, Self>
+    where
+        I: Input,
+        P: Parser<I, Output=O, Error=E, Message=M>,
+    { parser.parse(input) }
 
     fn convert_output<O>(output: impl Into<O>) -> O { output.into() }
 

@@ -59,8 +59,8 @@ where
     fn check(
         &self,
         input: &mut I,
-    ) -> bool
-    { self.apply::<Check>(input).is_success() }
+    ) -> ParseResult<Self::Output, Self::Error, Self::Message, Check>
+    { self.apply::<Check>(input) }
 
     /// Checks that the input matches this parser, and consumes matched input
     fn parse(
@@ -150,6 +150,32 @@ where
 
 }
 
+
+impl<O, E, M, F, I> Parser<I> for F
+where
+    F: Fn(&mut I) -> ParseResult<O, E, M, Parse>,
+    I: Input
+{
+
+    type Output = O;
+
+    type Error = E;
+
+    type Message = M;
+
+    fn apply<_Mode: Mode>(&self, input: &mut I) -> ParseResult<O, E, M, _Mode> {
+        _Mode::apply_parser(self, input)
+    }
+
+    fn check(&self, input: &mut I) -> ParseResult<O, E, M, Check> {
+        if (self)(input).is_success() {
+            ParseResult::Success((), ())
+        } else { ParseResult::Failure((), ()) }
+    }
+
+    fn parse(&self, input: &mut I) -> ParseResult<O, E, M, Parse> { self(input) }
+
+}
 
 /// Applies a parser preceded by an ignored prefix parser, and followed by an ignored terminator
 /// parser
