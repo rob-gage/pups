@@ -206,12 +206,11 @@ where
 { Nothing::new() }
 
 /// Iterates application of a parser
-pub const fn many<E, I, M, O1, O2, P1, P2>(
-    parser: P1,
-) -> impl Parser<I, Output = Vec<O1>, Error = E, Message = M> where
+pub const fn many<O, E, M, I, P>(
+    parser: P,
+) -> impl Parser<I, Output = Vec<O>, Error = E, Message = M> where
     I: Input,
-    P1: Parser<I, Output = O1, Error = E, Message = M>,
-    P2: Parser<I, Output = O2, Error = E, Message = M>,
+    P: Parser<I, Output = O, Error = E, Message = M>,
 { separated(parser, nothing()) }
 
 /// Optionally applies a parser, converting a failure into `Option::None`
