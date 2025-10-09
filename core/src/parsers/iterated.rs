@@ -20,7 +20,7 @@ pub struct Iterated<P1, P2> {
     /// The parser that is applied in multiple iterations
     pub parser: P1,
     /// The parser that is applied in between iterations
-    pub separator: Option<P2>,
+    pub separator: P2,
 }
 
 impl<P1, P2> Iterated<P1, P2> {
@@ -62,36 +62,33 @@ where
         let mut message_container: _Mode::MessageContainer<M> = _Mode::new_message_container();
         while output_count < maximum {
             // parse separator
-            let mut iteration_expected: bool = output_count < self.minimum;
-            if let Some (separator) = &self.separator && output_count > 0 {
-                match separator.apply::<_Mode>(input) {
-                    Success (_, messages) => {
-                        message_container =
-                            _Mode::merge_message_containers(message_container, messages);
-                        iteration_expected = true;
-                    }
-                    Failure (error, messages) => if output_count < self.minimum {
-                        input.set_cursor(start_cursor);
-                        return Failure (
-                            error,
-                            _Mode::merge_message_containers(message_container, messages)
-                        )
-                    } else { break }
-                }
-            }
-            // parse output
-            let cursor: usize = input.cursor();
-            match self.parser.apply::<_Mode>(input) {
-                Success (output, messages) => {
-                    debug_assert!(input.cursor() > cursor);
+            match self.separator.apply::<_Mode>(input) {
+                Success (_, messages) => {
                     message_container =
                         _Mode::merge_message_containers(message_container, messages);
-                    outputs = _Mode::merge_outputs(outputs, output, |mut outputs, output| {
-                        outputs.push(output); outputs
-                    });
-                    output_count += 1;
+                    // parse output
+                    let cursor: usize = input.cursor();
+                    match self.parser.apply::<_Mode>(input) {
+                        Success (output, messages) => {
+                            debug_assert!(input.cursor() > cursor);
+                            message_container =
+                                _Mode::merge_message_containers(message_container, messages);
+                            outputs = _Mode::merge_outputs(outputs, output, |mut outputs, output| {
+                                outputs.push(output); outputs
+                            });
+                            output_count += 1;
+                        }
+                        Failure (error, messages) => if output_count < self.minimum {
+                            input.set_cursor(start_cursor);
+                            return Failure (
+                                error,
+                                _Mode::merge_message_containers(message_container, messages)
+                            )
+                        } else { break }
+                    }
                 }
-                Failure (error, messages) => if iteration_expected {
+                Failure (error, messages) => if output_count < self.minimum {
+                    // fail if more iterations were required
                     input.set_cursor(start_cursor);
                     return Failure (
                         error,

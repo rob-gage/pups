@@ -5,6 +5,7 @@ mod end;
 mod first_match;
 mod iterated;
 mod mappers;
+mod nothing;
 mod optional;
 mod recoverable;
 mod sequenced;
@@ -26,6 +27,7 @@ use mappers::{
     ErrorMapper,
     MessageMapper,
 };
+use nothing::Nothing;
 use optional::Optional;
 use recoverable::Recoverable;
 use sequenced::Sequenced;
@@ -191,14 +193,17 @@ where
     P3: Parser<I, Output = O3, Error = E, Message = M>,
 { preceded(prefix, terminated(parser, terminator)) }
 
-
 /// Matches the end of the provided input
-pub fn end<O, E, M, I, P>() -> impl Parser<I, Output = (), Error = (), Message = ()>
+pub const fn end<I>() -> impl Parser<I, Output = (), Error = (), Message = ()>
 where
     I: Input,
-    P: Parser<I, Output = O, Error = E, Message = M>
 { End }
 
+/// Parses absolutely nothing
+pub const fn nothing<I, E, M>() -> impl Parser<I, Output = (), Error = E, Message = M>
+where
+    I: Input,
+{ Nothing::new() }
 
 /// Iterates application of a parser
 pub const fn many<E, I, M, O1, O2, P1, P2>(
@@ -207,8 +212,7 @@ pub const fn many<E, I, M, O1, O2, P1, P2>(
     I: Input,
     P1: Parser<I, Output = O1, Error = E, Message = M>,
     P2: Parser<I, Output = O2, Error = E, Message = M>,
-{ Iterated::<P1, P2> { maximum: None, minimum: 0, parser, separator: None } }
-
+{ separated(parser, nothing()) }
 
 /// Optionally applies a parser, converting a failure into `Option::None`
 pub const fn optional<O, E, M, I, P>(
@@ -218,7 +222,6 @@ pub const fn optional<O, E, M, I, P>(
     P: Parser<I, Output = O, Error = E, Message = M>,
 { Optional (parser) }
 
-
 /// Consumes input until a parser can be applied successfully or there is no input left
 pub const fn seek<O, E, M, I, P>(
     parser: P,
@@ -226,7 +229,6 @@ pub const fn seek<O, E, M, I, P>(
     I: Input,
     P: Parser<I, Output = O, Error = E, Message = M>,
 { FirstMatch (parser) }
-
 
 /// Applies a parser after an ignored prefix parser
 pub fn preceded<E, I, M, O1, O2, P1, P2>(
@@ -241,7 +243,6 @@ pub fn preceded<E, I, M, O1, O2, P1, P2>(
         .map(|(_, tail)| tail)
 }
 
-
 /// Iterates application of a parser separated by application of another parser
 pub const fn separated<E, I, M, O1, O2, P1, P2>(
     parser: P1,
@@ -250,8 +251,7 @@ pub const fn separated<E, I, M, O1, O2, P1, P2>(
     I: Input,
     P1: Parser<I, Output = O1, Error = E, Message = M>,
     P2: Parser<I, Output = O2, Error = E, Message = M>,
-{ Iterated { maximum: None, minimum: 0, parser, separator: Some(separator) } }
-
+{ Iterated { maximum: None, minimum: 0, parser, separator } }
 
 /// Applies a parser followed by an ignored terminator parser
 pub fn terminated<E, I, M, O1, O2, P1, P2>(
