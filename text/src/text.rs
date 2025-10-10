@@ -34,9 +34,9 @@ impl<'a> Input<'a> for Text<'a> {
         }
     }
 
-    fn cursor(&self) -> usize { self.byte_offset }
+    fn save(&self) -> usize { self.byte_offset }
 
-    fn set_cursor(&mut self, cursor: usize) { self.byte_offset = cursor; }
+    fn restore(&mut self, cursor: usize) { self.byte_offset = cursor; }
 
     fn next(&mut self) -> Option<Self::Item> {
         if let Some (character) = self.peek() {
@@ -54,6 +54,6 @@ impl<'a> TextInput for Text<'a> {
     fn starts_with(&self, string: &str) -> bool
     { self.buffer[self.byte_offset..].starts_with(string) }
 
-    fn skip_bytes(&mut self, byte_count: usize) { self.set_cursor(self.byte_offset + byte_count) }
+    fn skip_bytes(&mut self, byte_count: usize) { self.restore(self.byte_offset + byte_count) }
 
 }

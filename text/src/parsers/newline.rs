@@ -33,11 +33,11 @@ where
         &self,
         input: &mut I
     ) -> ModeResult<(), (), (), _Mode> {
-        let cursor: usize = input.cursor();
+        let cursor: usize = input.save();
         if let Some (character) = input.next() && character.is_newline() {
             Success (_Mode::convert_output(()), _Mode::new_message_container())
         } else {
-            input.set_cursor(cursor);
+            input.restore(cursor);
             Failure (_Mode::convert_error(()), _Mode::new_message_container())
         }
     }

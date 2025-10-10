@@ -33,7 +33,7 @@ where
         &self,
         input: &mut I
     ) -> ModeResult<String, (), (), _Mode> {
-        let cursor: usize = input.cursor();
+        let cursor: usize = input.save();
         if let Some (character) = input.next() && character.is_unicode_identifier_start() {
             let mut identifier: _Mode::OutputForm<String> = _Mode::convert_output({
                 let mut identifier: String = String::new();
@@ -41,10 +41,10 @@ where
                 identifier
             });
             loop {
-                let cursor: usize = input.cursor();
+                let cursor: usize = input.save();
                 let Some (character) = input.next() else { break; };
                 if !character.is_unicode_identifier_continuation() {
-                    input.set_cursor(cursor);
+                    input.restore(cursor);
                     break;
                 };
                 identifier = _Mode::merge_outputs(
@@ -55,7 +55,7 @@ where
             }
             Success (identifier, _Mode::new_message_container())
         } else {
-            input.set_cursor(cursor);
+            input.restore(cursor);
             Failure (_Mode::convert_error(()), _Mode::new_message_container())
         }
     }

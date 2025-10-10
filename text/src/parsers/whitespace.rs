@@ -36,9 +36,9 @@ where
         let mut whitespace: _Mode::OutputForm<String> = _Mode::convert_output(String::new());
         let mut not_empty: bool = false;
         loop {
-            let cursor: usize = input.cursor();
+            let cursor: usize = input.save();
             let Some (character) = input.next() else { break };
-            if !character.is_whitespace() { input.set_cursor(cursor); break }
+            if !character.is_whitespace() { input.restore(cursor); break }
             whitespace = _Mode::merge_outputs(
                 whitespace,
                 _Mode::convert_output(character),

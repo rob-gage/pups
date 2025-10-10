@@ -39,7 +39,7 @@ impl<P1, P2> Iterated<P1, P2> {
 
 }
 
-impl<'a, E, I, M, O1, O2, P1, P2> Parser<'a, I> for Iterated<P1, P2>
+impl<'a, O1, O2, E, M, I, P1, P2> Parser<'a, I> for Iterated<P1, P2>
 where
     I: Input<'a>,
     P1: Parser<'a, I, Output = O1, Error = E, Message = M>,
@@ -55,7 +55,7 @@ where
         &self,
         input: &mut I
     ) -> ModeResult<Vec<O1>, E, M, _Mode> {
-        let start_cursor: usize = input.cursor();
+        let start_cursor: usize = input.save();
         let maximum: usize = if let Some (maximum) = self.maximum { maximum } else { usize::MAX };
         let mut outputs: _Mode::OutputForm<Vec<O1>> = _Mode::convert_output(Vec::new());
         let mut output_count: usize = 0;
@@ -67,10 +67,10 @@ where
                     message_container =
                         _Mode::merge_message_containers(message_container, messages);
                     // parse output
-                    let cursor: usize = input.cursor();
+                    let cursor: usize = input.save();
                     match self.parser.apply::<_Mode>(input) {
                         Success (output, messages) => {
-                            debug_assert!(input.cursor() > cursor);
+                            debug_assert!(input.save() > cursor);
                             message_container =
                                 _Mode::merge_message_containers(message_container, messages);
                             outputs = _Mode::merge_outputs(outputs, output, |mut outputs, output| {
@@ -79,7 +79,7 @@ where
                             output_count += 1;
                         }
                         Failure (error, messages) => if output_count < self.minimum {
-                            input.set_cursor(start_cursor);
+                            input.restore(start_cursor);
                             return Failure (
                                 error,
                                 _Mode::merge_message_containers(message_container, messages)
@@ -89,7 +89,7 @@ where
                 }
                 Failure (error, messages) => if output_count < self.minimum {
                     // fail if more iterations were required
-                    input.set_cursor(start_cursor);
+                    input.restore(start_cursor);
                     return Failure (
                         error,
                         _Mode::merge_message_containers(message_container, messages)
