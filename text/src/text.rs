@@ -15,16 +15,16 @@ pub struct Text<'input> {
     byte_offset: usize,
 }
 
-impl<'input> Text<'input> {
+impl<'a> Text<'a> {
 
     /// Creates a new `Text` from a `&str`
-    fn from_string(string: &'input str) -> Self {
+    fn from_string(string: &'a str) -> Self {
         Self { buffer: string, byte_offset: 0 }
     }
 
 }
 
-impl<'input> Input for Text<'input> {
+impl<'a> Input<'a> for Text<'a> {
 
     type Item = char;
 
@@ -49,7 +49,7 @@ impl<'input> Input for Text<'input> {
 
 }
 
-impl<'input> TextInput for Text<'input> {
+impl<'a> TextInput for Text<'a> {
 
     fn starts_with(&self, string: &str) -> bool
     { self.buffer[self.byte_offset..].starts_with(string) }

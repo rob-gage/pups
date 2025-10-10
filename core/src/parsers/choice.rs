@@ -21,10 +21,10 @@ pub struct Choice<P1, P2> {
     pub primary: P1,
 }
 
-impl<E1, E2, I, M, O, P1, P2> Parser<I> for Choice<P1, P2> where
-    I: Input,
-    P1: Parser<I, Output = O, Error = E1, Message = M>,
-    P2: Parser<I, Output = O, Error = E2, Message = M>,
+impl<'a, E1, E2, I, M, O, P1, P2> Parser<'a, I> for Choice<P1, P2> where
+    I: Input<'a>,
+    P1: Parser<'a, I, Output = O, Error = E1, Message = M>,
+    P2: Parser<'a, I, Output = O, Error = E2, Message = M>,
 {
 
     type Output = O;

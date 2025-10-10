@@ -14,7 +14,7 @@ enum TestItem {
     C (isize),
 }
 
-impl Parser<TestInput> for TestItem {
+impl<'a> Parser<'a, TestInput> for TestItem {
 
     type Output = TestItem;
 
@@ -71,7 +71,7 @@ struct TestInput {
     cursor: usize,
 }
 
-impl Input for TestInput {
+impl<'a> Input<'a> for TestInput {
 
     type Item = TestItem;
 

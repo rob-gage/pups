@@ -19,33 +19,34 @@ use whitespace::Whitespace;
 use crate::parsers::unicode_identifier::UnicodeIdentifier;
 
 /// Parses a single newline character
-pub const fn newline<C, I>() -> impl Parser<I, Output = (), Error = (), Message = ()>
+pub const fn newline<'a, C, I>() -> impl Parser<'a, I, Output = (), Error = (), Message = ()>
 where
     C: Character,
-    I: Input<Item = C> + TextInput,
+    I: Input<'a, Item = C> + TextInput,
 { Newline }
 
 
 /// Parses a given lexeme from text
-pub const fn token<I>(
+pub const fn token<'a, I>(
     lexeme: &'static str
-) -> impl Parser<I, Output = &'static str, Error = (), Message = ()>
+) -> impl Parser<'a, I, Output = &'a str, Error = (), Message = ()>
 where
-    I: Input + TextInput,
+    I: Input<'a> + TextInput,
 { Token (lexeme) }
 
 
 /// Parses a unicode identifier
-pub const fn unicode_identifier<C, I>() -> impl Parser<I, Output = String, Error = (), Message = ()>
+pub const fn unicode_identifier<'a, C, I>(
+) -> impl Parser<'a, I, Output = String, Error = (), Message = ()>
 where
     C: Character,
-    I: Input<Item = C> + TextInput,
+    I: Input<'a, Item = C> + TextInput,
 { UnicodeIdentifier }
 
 
 /// Parses whitespace
-pub const fn whitespace<C, I>() -> impl Parser<I, Output = String, Error = (), Message = ()>
+pub const fn whitespace<'a, C, I>() -> impl Parser<'a, I, Output = String, Error = (), Message = ()>
 where
     C: Character,
-    I: Input<Item = C> + TextInput,
+    I: Input<'a, Item = C> + TextInput,
 { Whitespace }

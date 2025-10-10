@@ -18,10 +18,10 @@ use pups_core::{
 /// Parses a lexical token
 pub struct Newline;
 
-impl<C, I> Parser<I> for Newline
+impl<'a, C, I> Parser<'a, I> for Newline
 where
     C: Character,
-    I: Input<Item = C> + TextInput,
+    I: Input<'a, Item = C> + TextInput,
 {
     type Output = ();
 

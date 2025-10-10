@@ -15,10 +15,10 @@ use crate::{
 /// A combinator that applies a parser optionally
 pub struct Optional<P> (pub P);
 
-impl<E, I, M, O, P> Parser<I> for Optional<P>
+impl<'a, E, I, M, O, P> Parser<'a, I> for Optional<P>
 where
-    I: Input,
-    P: Parser<I, Output = O, Error = E, Message = M>,
+    I: Input<'a>,
+    P: Parser<'a, I, Output = O, Error = E, Message = M>,
 {
 
     type Output = Option<O>;

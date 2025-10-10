@@ -18,10 +18,10 @@ use pups_core::{
 /// Parses whitespace
 pub struct Whitespace;
 
-impl<C, I> Parser<I> for Whitespace
+impl<'a, C, I> Parser<'a, I> for Whitespace
 where
     C: Character,
-    I: Input<Item = C> + TextInput,
+    I: Input<'a, Item = C> + TextInput,
 {
     type Output = String;
 

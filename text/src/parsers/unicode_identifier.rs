@@ -18,10 +18,10 @@ use pups_core::{
 /// Parses a unicode identifier
 pub struct UnicodeIdentifier;
 
-impl<C, I> Parser<I> for UnicodeIdentifier
+impl<'a, C, I> Parser<'a, I> for UnicodeIdentifier
 where
     C: Character,
-    I: Input<Item = C> + TextInput,
+    I: Input<'a, Item = C> + TextInput,
 {
     type Output = String;
 

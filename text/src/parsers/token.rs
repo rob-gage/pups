@@ -15,11 +15,11 @@ use pups_core::{
 /// Parses a lexical token
 pub struct Token (pub &'static str);
 
-impl<I> Parser<I> for Token
+impl<'a, I> Parser<'a, I> for Token
 where
-    I: Input + TextInput,
+    I: Input<'a> + TextInput,
 {
-    type Output = &'static str;
+    type Output = &'a str;
 
     type Error = ();
 
@@ -28,7 +28,7 @@ where
     fn apply<_Mode: Mode>(
         &self,
         input: &mut I
-    ) -> ModeResult<&'static str, (), (), _Mode> {
+    ) -> ModeResult<&'a str, (), (), _Mode> {
         if input.starts_with(self.0) {
             Success (_Mode::convert_output(self.0), _Mode::new_message_container())
         } else {

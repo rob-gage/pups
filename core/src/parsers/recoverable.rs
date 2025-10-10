@@ -19,10 +19,10 @@ pub struct Recoverable<P1, P2> {
     pub parser: P1,
 }
 
-impl<E, I, M, O, P1, P2> Parser<I> for Recoverable<P1, P2> where
-    I: Input,
-    P1: Parser<I, Output = O, Error = E, Message = M>,
-    P2: Parser<I, Output = O, Error = E, Message = M>,
+impl<'a, E, I, M, O, P1, P2> Parser<'a, I> for Recoverable<P1, P2> where
+    I: Input<'a>,
+    P1: Parser<'a, I, Output = O, Error = E, Message = M>,
+    P2: Parser<'a, I, Output = O, Error = E, Message = M>,
 {
 
     type Output = O;

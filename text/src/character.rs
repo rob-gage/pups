@@ -1,6 +1,5 @@
 /// Copyright Rob Gage 2025
 
-use pups_core::{Input, Mode, ModeResult, Parser};
 use unicode_ident::{
     is_xid_continue,
     is_xid_start

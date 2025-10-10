@@ -23,9 +23,9 @@ impl<E, M> Nothing<E, M> {
 
 }
 
-impl<E, M, I> Parser<I> for Nothing<E, M>
+impl<'a, E, M, I> Parser<'a, I> for Nothing<E, M>
 where
-    I: Input,
+    I: Input<'a>,
 {
 
     type Output = ();

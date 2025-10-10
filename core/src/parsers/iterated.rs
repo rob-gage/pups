@@ -39,11 +39,11 @@ impl<P1, P2> Iterated<P1, P2> {
 
 }
 
-impl<E, I, M, O1, O2, P1, P2> Parser<I> for Iterated<P1, P2>
+impl<'a, E, I, M, O1, O2, P1, P2> Parser<'a, I> for Iterated<P1, P2>
 where
-    I: Input,
-    P1: Parser<I, Output = O1, Error = E, Message = M>,
-    P2: Parser<I, Output = O2, Error = E, Message = M>,
+    I: Input<'a>,
+    P1: Parser<'a, I, Output = O1, Error = E, Message = M>,
+    P2: Parser<'a, I, Output = O2, Error = E, Message = M>,
 {
     type Output = Vec<O1>;
 

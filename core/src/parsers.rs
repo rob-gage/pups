@@ -4,7 +4,7 @@ mod choice;
 mod end;
 mod first_match;
 mod iterated;
-mod mappers;
+mod mapped;
 mod nothing;
 mod optional;
 mod recoverable;
@@ -22,10 +22,10 @@ use choice::Choice;
 use end::End;
 use first_match::FirstMatch;
 use iterated::Iterated;
-use mappers::{
-    OutputMapper,
-    ErrorMapper,
-    MessageMapper,
+use mapped::{
+    OutputMapped,
+    ErrorMapped,
+    MessagesMapped,
 };
 use nothing::Nothing;
 use optional::Optional;
@@ -34,10 +34,10 @@ use sequenced::Sequenced;
 
 
 /// Implementors can be parsed from an input type
-pub trait Parser<I>
+pub trait Parser<'a, I>
 where
     Self: Sized,
-    I: Input
+    I: Input<'a>
 {
 
     // PARSER IMPLEMENTATION
@@ -78,85 +78,84 @@ where
     fn catch<P>(
         self,
         fallback: P
-    ) -> impl Parser<I, Output = Self::Output, Error = Self::Error, Message = Self::Message>
+    ) -> impl Parser<'a, I, Output = Self::Output, Error = Self::Error, Message = Self::Message>
     where
-        P: Parser<I, Output = Self::Output, Error = Self::Error, Message = Self::Message>
+        P: Parser<'a, I, Output = Self::Output, Error = Self::Error, Message = Self::Message>
     { Recoverable { fallback, parser: self } }
 
     /// Ignores this parser's result and then applies another
     fn ignore_then<P, O>(
         self,
         next: P
-    ) -> impl Parser<I, Output = O, Error = Self::Error, Message = Self::Message>
+    ) -> impl Parser<'a, I, Output = O, Error = Self::Error, Message = Self::Message>
     where
-        P: Parser<I, Output = O, Error = Self::Error, Message = Self::Message>
+        P: Parser<'a, I, Output = O, Error = Self::Error, Message = Self::Message>
     { preceded(self, next) }
 
     /// Tries another parser if this one fails
     fn or<P, E>(
         self,
         alternate: P
-    ) -> impl Parser<I, Output = Self::Output, Error = (Self::Error, E), Message = Self::Message>
+    ) -> impl Parser<'a, I, Output = Self::Output, Error = (Self::Error, E), Message = Self::Message>
     where
-        P: Parser<I, Output = Self::Output, Error = E, Message = Self::Message>
+        P: Parser<'a, I, Output = Self::Output, Error = E, Message = Self::Message>
     {  Choice { primary: self, alternate } }
 
     /// Applies a parser optionally, returning `None` instead of an error if it fails
     fn or_not(
         self
-    ) -> impl Parser<I, Output = Option<Self::Output>, Error = Self::Error, Message = Self::Message>
+    ) -> impl Parser<'a, I, Output = Option<Self::Output>, Error = Self::Error, Message = Self::Message>
     { optional(self) }
 
     /// Maps a parser's output to another type using a function
     fn map<O>(
         self,
         f: impl Fn(Self::Output) -> O + Clone
-    ) -> impl Parser<I, Output = O, Error = Self::Error, Message = Self::Message> {
-        OutputMapper { parser: self, function: f }
+    ) -> impl Parser<'a, I, Output = O, Error = Self::Error, Message = Self::Message> {
+        OutputMapped { parser: self, function: f }
     }
 
     /// Maps a parser's error to another type using a function
     fn map_error<E>(
         self,
         f: impl Fn(Self::Error) -> E + Clone
-    ) -> impl Parser<I, Output = Self::Output, Error = E, Message = Self::Message> {
-        ErrorMapper { parser: self, function: f }
+    ) -> impl Parser<'a, I, Output = Self::Output, Error = E, Message = Self::Message> {
+        ErrorMapped { parser: self, function: f }
     }
 
     /// Maps a parser's messages to another type using a function
     fn map_messages<M>(
         self,
         f: impl Fn(Self::Message) -> M + Clone
-    ) -> impl Parser<I, Output = Self::Output, Error = Self::Error, Message = M> {
-        MessageMapper { parser: self, function: f }
+    ) -> impl Parser<'a, I, Output = Self::Output, Error = Self::Error, Message = M> {
+        MessagesMapped { parser: self, function: f }
     }
 
     /// Applies another parser in sequence after this one, and returns both results as a tuple
     fn then<P, O>(
         self,
         next: P
-    ) -> impl Parser<I, Output = (Self::Output, O), Error = Self::Error, Message = Self::Message>
+    ) -> impl Parser<'a, I, Output = (Self::Output, O), Error = Self::Error, Message = Self::Message>
     where
-        P: Parser<I, Output = O, Error = Self::Error, Message = Self::Message>
+        P: Parser<'a, I, Output = O, Error = Self::Error, Message = Self::Message>
     { Sequenced { head: self, tail: next } }
 
     /// Applies another parser in sequence after this one, but ignores its result
     fn then_ignore<P, O>(
         self,
         next: P
-    ) -> impl Parser<I, Output = Self::Output, Error = Self::Error, Message = Self::Message>
+    ) -> impl Parser<'a, I, Output = Self::Output, Error = Self::Error, Message = Self::Message>
     where
-        I: Input,
-        P: Parser<I, Output = O, Error = Self::Error, Message = Self::Message>
+        P: Parser<'a, I, Output = O, Error = Self::Error, Message = Self::Message>
     { terminated(self, next) }
 
 }
 
 
-impl<O, E, M, F, I> Parser<I> for F
+impl<'a, O, E, M, F, I> Parser<'a, I> for F
 where
     F: Fn(&mut I) -> ModeResult<O, E, M, Parse>,
-    I: Input
+    I: Input<'a>
 {
 
     type Output = O;
@@ -181,86 +180,88 @@ where
 
 /// Applies a parser preceded by an ignored prefix parser, and followed by an ignored terminator
 /// parser
-pub fn delimited<E, I, M, O1, O2, O3, P1, P2, P3>(
+pub fn delimited<'a, O1, O2, O3, E, M, I, P1, P2, P3>(
     prefix: P1,
     parser: P2,
     terminator: P3,
-) -> impl Parser<I, Error = E, Output = O2, Message = M>
+) -> impl Parser<'a, I, Error = E, Output = O2, Message = M>
 where
-    I: Input,
-    P1: Parser<I, Output = O1, Error = E, Message = M>,
-    P2: Parser<I, Output = O2, Error = E, Message = M>,
-    P3: Parser<I, Output = O3, Error = E, Message = M>,
+    I: Input<'a>,
+    P1: Parser<'a, I, Output = O1, Error = E, Message = M>,
+    P2: Parser<'a, I, Output = O2, Error = E, Message = M>,
+    P3: Parser<'a, I, Output = O3, Error = E, Message = M>,
 { preceded(prefix, terminated(parser, terminator)) }
 
 /// Matches the end of the provided input
-pub const fn end<I>() -> impl Parser<I, Output = (), Error = (), Message = ()>
+pub const fn end<'a, I>() -> impl Parser<'a, I, Output = (), Error = (), Message = ()>
 where
-    I: Input,
+    I: Input<'a>,
 { End }
 
 /// Parses absolutely nothing
-pub const fn nothing<I, E, M>() -> impl Parser<I, Output = (), Error = E, Message = M>
+pub const fn nothing<'a, E, M, I>() -> impl Parser<'a, I, Output = (), Error = E, Message = M>
 where
-    I: Input,
+    I: Input<'a>,
 { Nothing::new() }
 
 /// Iterates application of a parser
-pub const fn many<O, E, M, I, P>(
+pub const fn many<'a, O, E, M, I, P>(
     parser: P,
-) -> impl Parser<I, Output = Vec<O>, Error = E, Message = M> where
-    I: Input,
-    P: Parser<I, Output = O, Error = E, Message = M>,
+) -> impl Parser<'a, I, Output = Vec<O>, Error = E, Message = M> where
+    I: Input<'a>,
+    P: Parser<'a, I, Output = O, Error = E, Message = M>,
 { separated(parser, nothing()) }
 
 /// Optionally applies a parser, converting a failure into `Option::None`
-pub const fn optional<O, E, M, I, P>(
+pub const fn optional<'a, O, E, M, I, P>(
     parser: P,
-) -> impl Parser<I, Output = Option<O>, Error = E, Message = M> where
-    I: Input,
-    P: Parser<I, Output = O, Error = E, Message = M>,
+) -> impl Parser<'a, I, Output = Option<O>, Error = E, Message = M> where
+    I: Input<'a>,
+    P: Parser<'a, I, Output = O, Error = E, Message = M>,
 { Optional (parser) }
 
 /// Consumes input until a parser can be applied successfully or there is no input left
-pub const fn seek<O, E, M, I, P>(
+pub const fn seek<'a, O, E, M, I, P>(
     parser: P,
-) -> impl Parser<I, Output = Option<O>, Error = E, Message = M> where
-    I: Input,
-    P: Parser<I, Output = O, Error = E, Message = M>,
+) -> impl Parser<'a, I, Output = Option<O>, Error = E, Message = M> where
+    I: Input<'a>,
+    P: Parser<'a, I, Output = O, Error = E, Message = M>,
 { FirstMatch (parser) }
 
 /// Applies a parser after an ignored prefix parser
-pub fn preceded<E, I, M, O1, O2, P1, P2>(
+pub const fn preceded<'a, O1, O2, E,  M, I, P1, P2>(
     prefix: P1,
     parser: P2
-) -> impl Parser<I, Output = O2, Error = E, Message = M> where
-    I: Input,
-    P1: Parser<I, Output = O1, Error = E, Message = M>,
-    P2: Parser<I, Output = O2, Error = E, Message = M>,
-{
-    Sequenced { head: prefix, tail: parser }
-        .map(|(_, tail)| tail)
-}
+) -> impl Parser<'a, I, Output = O2, Error = E, Message = M> where
+    I: Input<'a>,
+    P1: Parser<'a, I, Output = O1, Error = E, Message = M>,
+    P2: Parser<'a, I, Output = O2, Error = E, Message = M>,
+{ OutputMapped {
+    parser: Sequenced { head: prefix, tail: parser },
+    function: |(_, output)| output
+} }
 
 /// Iterates application of a parser separated by application of another parser
-pub const fn separated<E, I, M, O1, O2, P1, P2>(
+pub const fn separated<'a, E, I, M, O1, O2, P1, P2>(
     parser: P1,
     separator: P2
-) -> impl Parser<I, Output = Vec<O1>, Error = E, Message = M> where
-    I: Input,
-    P1: Parser<I, Output = O1, Error = E, Message = M>,
-    P2: Parser<I, Output = O2, Error = E, Message = M>,
+) -> impl Parser<'a, I, Output = Vec<O1>, Error = E, Message = M> where
+    I: Input<'a>,
+    P1: Parser<'a, I, Output = O1, Error = E, Message = M>,
+    P2: Parser<'a, I, Output = O2, Error = E, Message = M>,
 { Iterated { maximum: None, minimum: 0, parser, separator } }
 
 /// Applies a parser followed by an ignored terminator parser
-pub fn terminated<E, I, M, O1, O2, P1, P2>(
+pub const fn terminated<'a, O1, O2, E, M, I, P1, P2>(
     parser: P1,
     terminator: P2
-) -> impl Parser<I, Output = O1, Error = E, Message = M> where
-    I: Input,
-    P1: Parser<I, Output = O1, Error = E, Message = M>,
-    P2: Parser<I, Output = O2, Error = E, Message = M>,
+) -> impl Parser<'a, I, Output = O1, Error = E, Message = M> where
+    I: Input<'a>,
+    P1: Parser<'a, I, Output = O1, Error = E, Message = M>,
+    P2: Parser<'a, I, Output = O2, Error = E, Message = M>,
 {
-    Sequenced { head: parser, tail: terminator }
-        .map(|(head, _)| head)
+    OutputMapped {
+        parser: Sequenced { head: parser, tail: terminator },
+        function: |(output, _)| output
+    }
 }

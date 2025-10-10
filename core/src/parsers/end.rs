@@ -15,9 +15,9 @@ use crate::{
 /// Requires that there be no input remaining
 pub struct End;
 
-impl<I> Parser<I> for End
+impl<'a, I> Parser<'a, I> for End
 where
-    I: Input,
+    I: Input<'a>,
 {
 
     type Output = ();

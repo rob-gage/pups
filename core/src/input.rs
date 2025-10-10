@@ -1,7 +1,7 @@
 // Copyright Rob Gage 2025
 
 /// Implementors represent input that can be consumed by parsers
-pub trait Input {
+pub trait Input<'a> {
 
     /// The type of item that is stored in the `Input`
     type Item;

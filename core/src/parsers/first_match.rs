@@ -16,10 +16,10 @@ use crate::{
 /// exists
 pub struct FirstMatch<P> (pub P);
 
-impl<E, I, M, O, P> Parser<I> for FirstMatch<P>
+impl<'a, E, I, M, O, P> Parser<'a, I> for FirstMatch<P>
 where
-    I: Input,
-    P: Parser<I, Output = O, Error = E, Message = M>,
+    I: Input<'a>,
+    P: Parser<'a, I, Output = O, Error = E, Message = M>,
 {
 
     type Output = Option<O>;
