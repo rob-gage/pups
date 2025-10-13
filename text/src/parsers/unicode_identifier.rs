@@ -31,7 +31,7 @@ where
 
     fn apply<_Mode: Mode>(
         &self,
-        input: &mut I
+        input: &'a I
     ) -> ModeResult<String, (), (), _Mode> {
         let cursor: usize = input.save();
         if let Some (character) = input.next() && character.is_unicode_identifier_start() {

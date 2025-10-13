@@ -29,7 +29,7 @@ where
     /// Applies a parser using this `Mode`
     fn apply_parser<'a, O, E, M, I, P>(
         parser: P,
-        input: &mut I,
+        input: &'a I,
     ) -> ModeResult<O, E, M, Self>
     where
         I: Input<'a>,
@@ -99,7 +99,7 @@ impl Mode for Check {
 
     type MessageContainer<M> = ();
 
-    fn apply_parser<'a, O, E, M, I, P>(parser: P, input: &mut I) -> ModeResult<O, E, M, Self>
+    fn apply_parser<'a, O, E, M, I, P>(parser: P, input: &'a I) -> ModeResult<O, E, M, Self>
     where
         I: Input<'a, >,
         P: Parser<'a, I, Output = O, Error = E, Message = M>,
@@ -165,7 +165,7 @@ impl Mode for Parse {
 
     type MessageContainer<M> = Vec<M>;
 
-    fn apply_parser<'a, O, E, M, I, P>(parser: P, input: &mut I) -> ModeResult<O, E, M, Self>
+    fn apply_parser<'a, O, E, M, I, P>(parser: P, input: &'a I) -> ModeResult<O, E, M, Self>
     where
         I: Input<'a>,
         P: Parser<'a, I, Output = O, Error = E, Message = M>,

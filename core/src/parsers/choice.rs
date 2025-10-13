@@ -33,7 +33,7 @@ impl<'a, E1, E2, I, M, O, P1, P2> Parser<'a, I> for Choice<P1, P2> where
 
     type Message = M;
 
-    fn apply<_Mode: Mode>(&self, input: &mut I) -> ModeResult<O, (E1, E2), M, _Mode> {
+    fn apply<_Mode: Mode>(&self, input: &'a I) -> ModeResult<O, (E1, E2), M, _Mode> {
         match self.primary.apply::<_Mode>(input) {
             Success (output, messages) => Success (output, messages),
             Failure (primary_error, _) =>

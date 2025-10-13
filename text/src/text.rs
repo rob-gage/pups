@@ -28,6 +28,8 @@ impl<'a> Input<'a> for Text<'a> {
 
     type Item = char;
 
+    type Slice = &'a str;
+
     fn advance(&self) {
         if let Some (character) = self.peek() {
             unsafe {
@@ -37,13 +39,16 @@ impl<'a> Input<'a> for Text<'a> {
         }
     }
 
-    fn save(&self) -> usize { self.byte_offset }
-
-    fn restore(&self, cursor: usize) {
-        unsafe {
-            let mutable: *mut Self = self as *const Self as *mut Self;
-            (*mutable).byte_offset = cursor;
+    fn consume(&'a self, length: usize) -> Option<&'a str> {
+        let start: usize = self.save();
+        let mut slice_byte_count: usize = 0;
+        for _ in 0..length {
+            if let Some(character) = self.next() {
+                slice_byte_count += character.length();
+            } else { return None; }
         }
+        let slice: &'a str = &self.buffer[start..start + slice_byte_count];
+        Some (slice)
     }
 
     fn next(&self) -> Option<Self::Item> {
@@ -59,6 +64,15 @@ impl<'a> Input<'a> for Text<'a> {
     fn peek(&self) -> Option<Self::Item> {
         char::next_in(&self.buffer[self.byte_offset..])
     }
+
+    fn restore(&self, cursor: usize) {
+        unsafe {
+            let mutable: *mut Self = self as *const Self as *mut Self;
+            (*mutable).byte_offset = cursor;
+        }
+    }
+
+    fn save(&self) -> usize { self.byte_offset }
 
 }
 

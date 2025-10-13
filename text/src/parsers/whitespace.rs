@@ -31,7 +31,7 @@ where
 
     fn apply<_Mode: Mode>(
         &self,
-        input: &mut I
+        input: &'a I
     ) -> ModeResult<String, (), (), _Mode> {
         let mut whitespace: _Mode::OutputForm<String> = _Mode::convert_output(String::new());
         let mut not_empty: bool = false;

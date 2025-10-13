@@ -53,7 +53,7 @@ where
 
     fn apply<_Mode: Mode>(
         &self,
-        input: &mut I
+        input: &'a I
     ) -> ModeResult<Vec<O1>, E, M, _Mode> {
         let start_cursor: usize = input.save();
         let maximum: usize = if let Some (maximum) = self.maximum { maximum } else { usize::MAX };

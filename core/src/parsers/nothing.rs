@@ -34,7 +34,7 @@ where
 
     type Message = M;
 
-    fn apply<_Mode: Mode>(&self, input: &mut I) -> ModeResult<(), E, M, _Mode> {
+    fn apply<_Mode: Mode>(&self, input: &'a I) -> ModeResult<(), E, M, _Mode> {
         Success (_Mode::convert_output(()), _Mode::new_message_container())
     }
 

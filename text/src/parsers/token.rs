@@ -27,7 +27,7 @@ where
 
     fn apply<_Mode: Mode>(
         &self,
-        input: &mut I
+        input: &'a I
     ) -> ModeResult<&'a str, (), (), _Mode> {
         if input.starts_with(self.0) {
             Success (_Mode::convert_output(self.0), _Mode::new_message_container())

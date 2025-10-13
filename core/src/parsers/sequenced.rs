@@ -32,7 +32,7 @@ impl<'a, E, I, M, O1, O2, P1, P2> Parser<'a, I> for Sequenced<P1, P2> where
 
     fn apply<_Mode: Mode>(
         &self,
-        input: &mut I
+        input: &'a I
     ) -> ModeResult<(O1, O2), E, M, _Mode> {
         let cursor = input.save();
         match self.head.apply::<_Mode>(input) {

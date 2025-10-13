@@ -31,7 +31,7 @@ impl<'a, E, I, M, O, P1, P2> Parser<'a, I> for Recoverable<P1, P2> where
 
     type Message = M;
 
-    fn apply<_Mode: Mode>(&self, input: &mut I) -> ModeResult<O, E, M, _Mode> {
+    fn apply<_Mode: Mode>(&self, input: &'a I) -> ModeResult<O, E, M, _Mode> {
         match self.parser.apply::<_Mode>(input) {
             Failure (_, primary_messages) => match self.fallback.apply::<_Mode>(input) {
                     Failure (alternate_error, alternate_messages) => Failure (

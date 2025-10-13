@@ -54,20 +54,20 @@ where
     /// Applies a parser
     fn apply<_Mode: Mode>(
         &self,
-        input: &mut I
+        input: &'a I
     ) -> ModeResult<Self::Output, Self::Error, Self::Message, _Mode>;
 
     /// Checks that the input matches this parser, and consumes matched input
     fn check(
         &self,
-        input: &mut I,
+        input: &'a I,
     ) -> ModeResult<Self::Output, Self::Error, Self::Message, Check>
     { self.apply::<Check>(input) }
 
     /// Checks that the input matches this parser, and consumes matched input
     fn parse(
         &self,
-        input: &mut I,
+        input: &'a I,
     ) -> ModeResult<Self::Output, Self::Error, Self::Message, Parse>
     { self.apply::<Parse>(input) }
 
@@ -154,8 +154,8 @@ where
 
 impl<'a, O, E, M, F, I> Parser<'a, I> for F
 where
-    F: Fn(&mut I) -> ModeResult<O, E, M, Parse>,
-    I: Input<'a>
+    F: Fn(&'a I) -> ModeResult<O, E, M, Parse>,
+    I: Input<'a> +'a
 {
 
     type Output = O;
@@ -164,17 +164,17 @@ where
 
     type Message = M;
 
-    fn apply<_Mode: Mode>(&self, input: &mut I) -> ModeResult<O, E, M, _Mode> {
+    fn apply<_Mode: Mode>(&self, input: &'a I) -> ModeResult<O, E, M, _Mode> {
         _Mode::apply_parser(self, input)
     }
 
-    fn check(&self, input: &mut I) -> ModeResult<O, E, M, Check> {
+    fn check(&self, input: &'a I) -> ModeResult<O, E, M, Check> {
         if (self)(input).is_success() {
             ModeResult::Success((), ())
         } else { ModeResult::Failure((), ()) }
     }
 
-    fn parse(&self, input: &mut I) -> ModeResult<O, E, M, Parse> { self(input) }
+    fn parse(&self, input: &'a I) -> ModeResult<O, E, M, Parse> { self(input) }
 
 }
 

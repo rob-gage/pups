@@ -16,16 +16,16 @@ enum TestItem {
 
 impl<'a> Parser<'a, TestInput> for TestItem {
 
-    type Output = TestItem;
+    type Output = &'a TestItem;
 
-    type Error = TestError;
+    type Error = TestError<'a>;
 
     type Message = ();
 
     fn apply<_Mode: Mode>(
         &self,
-        input: &mut TestInput
-    ) -> ModeResult<TestItem, TestError, (), _Mode> {
+        input: &'a TestInput
+    ) -> ModeResult<&'a TestItem, TestError<'a>, (), _Mode> {
         let cursor: usize = input.save();
         let Some(item) = input.next() else {
             input.restore(cursor);
@@ -38,7 +38,7 @@ impl<'a> Parser<'a, TestInput> for TestItem {
                 _Mode::new_message_container()
             )
         };
-        if item == *self {
+        if *item == *self {
             ModeResult::Success(
                 _Mode::convert_output(item),
                 _Mode::new_message_container()
@@ -59,8 +59,8 @@ impl<'a> Parser<'a, TestInput> for TestItem {
 }
 
 
-struct TestError {
-    encountered_item: Option<TestItem>,
+struct TestError<'a> {
+    encountered_item: Option<&'a TestItem>,
     expected_item: TestItem,
     position: usize,
 }
@@ -73,7 +73,9 @@ struct TestInput {
 
 impl<'a> Input<'a> for TestInput {
 
-    type Item = TestItem;
+    type Item = &'a TestItem;
+
+    type Slice = &'a [TestItem];
 
     fn advance(&self) {
         unsafe {
@@ -82,7 +84,18 @@ impl<'a> Input<'a> for TestInput {
         }
     }
 
-    fn save(&self) -> usize { self.cursor }
+    fn consume(&'a self, length: usize) -> Option<Self::Slice> {
+        if length > (self.items.len() - self.cursor) { None } else {
+            let slice: Self::Slice = &self.items[self.cursor .. self.cursor + length];
+            unsafe {
+                let mutable: *mut Self = self as *const Self as *mut Self;
+                (*mutable).cursor += length;
+            }
+            Some (slice)
+        }
+    }
+
+    fn peek(&'a self) -> Option<Self::Item> { self.items.get(self.cursor) }
 
     fn restore(&self, position: usize) {
         unsafe {
@@ -91,8 +104,6 @@ impl<'a> Input<'a> for TestInput {
         }
     }
 
-    fn peek<'b>(&self) -> Option<Self::Item> {
-        self.items.get(self.cursor).map(|item| item.clone())
-    }
+    fn save(&self) -> usize { self.cursor }
 
 }

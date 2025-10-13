@@ -30,7 +30,7 @@ impl<'a, E, F, I, M, P, OA, OB> Parser<'a, I> for OutputMapped<F, P> where
 
     fn apply<_Mode: Mode>(
         &self,
-        input: &mut I
+        input: &'a I
     ) -> ModeResult<Self::Output, Self::Error, Self::Message, _Mode> {
         _Mode::map_output(
             self.parser.apply::<_Mode>(input),
@@ -64,7 +64,7 @@ impl<'a, EA, EB, F, I, M, P, O> Parser<'a, I> for ErrorMapped<F, P> where
 
     fn apply<_Mode: Mode>(
         &self,
-        input: &mut I
+        input: &'a I
     ) -> ModeResult<Self::Output, Self::Error, Self::Message, _Mode> {
         _Mode::map_error(
             self.parser.apply::<_Mode>(input),
@@ -98,7 +98,7 @@ impl<'a, E, F, I, MA, MB, P, O> Parser<'a, I> for MessagesMapped<F, P> where
 
     fn apply<_Mode: Mode>(
         &self,
-        input: &mut I
+        input: &'a I
     ) -> ModeResult<Self::Output, Self::Error, Self::Message, _Mode> {
         _Mode::map_messages(
             self.parser.apply::<_Mode>(input),
