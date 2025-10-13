@@ -28,24 +28,37 @@ impl<'a> Input<'a> for Text<'a> {
 
     type Item = char;
 
-    fn advance(&mut self) {
+    fn advance(&self) {
         if let Some (character) = self.peek() {
-            self.byte_offset += character.length();
+            unsafe {
+                let mutable: *mut Self = self as *const Self as *mut Self;
+                (*mutable).byte_offset += character.length();
+            }
         }
     }
 
     fn save(&self) -> usize { self.byte_offset }
 
-    fn restore(&mut self, cursor: usize) { self.byte_offset = cursor; }
+    fn restore(&self, cursor: usize) {
+        unsafe {
+            let mutable: *mut Self = self as *const Self as *mut Self;
+            (*mutable).byte_offset = cursor;
+        }
+    }
 
-    fn next(&mut self) -> Option<Self::Item> {
+    fn next(&self) -> Option<Self::Item> {
         if let Some (character) = self.peek() {
-            self.byte_offset += character.length();
+            unsafe {
+                let mutable: *mut Self = self as *const Self as *mut Self;
+                (*mutable).byte_offset += character.length();
+            }
             Some (character)
         } else { None }
     }
 
-    fn peek(&self) -> Option<Self::Item> { char::next_in(&self.buffer[self.byte_offset..]) }
+    fn peek(&self) -> Option<Self::Item> {
+        char::next_in(&self.buffer[self.byte_offset..])
+    }
 
 }
 

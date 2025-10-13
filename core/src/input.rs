@@ -9,14 +9,14 @@ pub trait Input<'a> {
     fn advance(&self);
 
     /// Returns the next `Self::Item` in `Self` if it exists and advances the cursor
-    fn next<'b>(&'b self) -> Option<&'b Self::Item> {
-        let item: &'b Self::Item = self.peek()?;
+    fn next(&self) -> Option<Self::Item> {
+        let item: Self::Item = self.peek()?;
         self.advance();
         Some (item)
     }
 
     /// Returns the next `Self::Item` in `Self` if it exists
-    fn peek<'b>(&self) -> Option<&'b Self::Item>;
+    fn peek(&self) -> Option<Self::Item>;
 
     /// Restores the cursor of this `Input` to a given position
     fn restore(&self, position: usize);

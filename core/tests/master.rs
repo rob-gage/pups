@@ -75,13 +75,23 @@ impl<'a> Input<'a> for TestInput {
 
     type Item = TestItem;
 
-    fn advance(&mut self) { self.cursor += 1; }
+    fn advance(&self) {
+        unsafe {
+            let mutable: *mut Self = self as *const Self as *mut Self;
+            (*mutable).cursor += 1;
+        }
+    }
 
     fn save(&self) -> usize { self.cursor }
 
-    fn restore(&mut self, position: usize) { self.cursor = position }
+    fn restore(&self, position: usize) {
+        unsafe {
+            let mutable: *mut Self = self as *const Self as *mut Self;
+            (*mutable).cursor = position;
+        }
+    }
 
-    fn peek(&self) -> Option<Self::Item> {
+    fn peek<'b>(&self) -> Option<Self::Item> {
         self.items.get(self.cursor).map(|item| item.clone())
     }
 
