@@ -23,7 +23,7 @@ where
     C: Character,
     I: Input<'a, Item = C> + TextInput,
 {
-    type Output = String;
+    type Output = I::Slice;
 
     type Error = ();
 
@@ -32,30 +32,25 @@ where
     fn apply<_Mode: Mode>(
         &self,
         input: &'a I
-    ) -> ModeResult<String, (), (), _Mode> {
-        let cursor: usize = input.save();
+    ) -> ModeResult<I::Slice, (), (), _Mode> {
+        let start: usize = input.save_cursor();
         if let Some (character) = input.next() && character.is_unicode_identifier_start() {
-            let mut identifier: _Mode::OutputForm<String> = _Mode::convert_output({
-                let mut identifier: String = String::new();
-                character.write(&mut identifier);
-                identifier
-            });
             loop {
-                let cursor: usize = input.save();
+                let cursor: usize = input.save_cursor();
                 let Some (character) = input.next() else { break; };
                 if !character.is_unicode_identifier_continuation() {
-                    input.restore(cursor);
+                    input.restore_cursor(cursor);
                     break;
                 };
-                identifier = _Mode::merge_outputs(
-                    identifier,
-                    _Mode::convert_output(character),
-                    |mut i, c: C| { c.write(&mut i); i }
-                );
             }
-            Success (identifier, _Mode::new_message_container())
+            let length: usize = input.save_cursor() - start;
+            input.restore_cursor(start);
+            Success (
+                _Mode::convert_output(input.consume(length).unwrap()),
+                _Mode::new_message_container()
+            )
         } else {
-            input.restore(cursor);
+            input.restore_cursor(start);
             Failure (_Mode::convert_error(()), _Mode::new_message_container())
         }
     }

@@ -34,7 +34,7 @@ impl<'a, E, I, M, O1, O2, P1, P2> Parser<'a, I> for Sequenced<P1, P2> where
         &self,
         input: &'a I
     ) -> ModeResult<(O1, O2), E, M, _Mode> {
-        let cursor = input.save();
+        let cursor = input.save_cursor();
         match self.head.apply::<_Mode>(input) {
             Success (head_output, head_messages) => match self.tail.apply::<_Mode>(input) {
                 Success (tail_output, tail_messages) => {
@@ -47,7 +47,7 @@ impl<'a, E, I, M, O1, O2, P1, P2> Parser<'a, I> for Sequenced<P1, P2> where
                     )
                 }
                 Failure (tail_error, tail_messages) => {
-                    input.restore(cursor);
+                    input.restore_cursor(cursor);
                     Failure (
                         tail_error,
                         _Mode::merge_message_containers(head_messages, tail_messages)

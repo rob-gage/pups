@@ -55,7 +55,7 @@ where
         &self,
         input: &'a I
     ) -> ModeResult<Vec<O1>, E, M, _Mode> {
-        let start_cursor: usize = input.save();
+        let start_cursor: usize = input.save_cursor();
         let maximum: usize = if let Some (maximum) = self.maximum { maximum } else { usize::MAX };
         let mut outputs: _Mode::OutputForm<Vec<O1>> = _Mode::convert_output(Vec::new());
         let mut output_count: usize = 0;
@@ -67,10 +67,10 @@ where
                     message_container =
                         _Mode::merge_message_containers(message_container, messages);
                     // parse output
-                    let cursor: usize = input.save();
+                    let cursor: usize = input.save_cursor();
                     match self.parser.apply::<_Mode>(input) {
                         Success (output, messages) => {
-                            debug_assert!(input.save() > cursor);
+                            debug_assert!(input.save_cursor() > cursor);
                             message_container =
                                 _Mode::merge_message_containers(message_container, messages);
                             outputs = _Mode::merge_outputs(outputs, output, |mut outputs, output| {
@@ -79,7 +79,7 @@ where
                             output_count += 1;
                         }
                         Failure (error, messages) => if output_count < self.minimum {
-                            input.restore(start_cursor);
+                            input.restore_cursor(start_cursor);
                             return Failure (
                                 error,
                                 _Mode::merge_message_containers(message_container, messages)
@@ -89,7 +89,7 @@ where
                 }
                 Failure (error, messages) => if output_count < self.minimum {
                     // fail if more iterations were required
-                    input.restore(start_cursor);
+                    input.restore_cursor(start_cursor);
                     return Failure (
                         error,
                         _Mode::merge_message_containers(message_container, messages)

@@ -26,9 +26,9 @@ impl<'a> Parser<'a, TestInput> for TestItem {
         &self,
         input: &'a TestInput
     ) -> ModeResult<&'a TestItem, TestError<'a>, (), _Mode> {
-        let cursor: usize = input.save();
+        let cursor: usize = input.save_cursor();
         let Some(item) = input.next() else {
-            input.restore(cursor);
+            input.restore_cursor(cursor);
             return ModeResult::Failure (
                 _Mode::convert_error(TestError {
                     encountered_item: None,
@@ -44,7 +44,7 @@ impl<'a> Parser<'a, TestInput> for TestItem {
                 _Mode::new_message_container()
             )
         } else {
-            input.restore(cursor);
+            input.restore_cursor(cursor);
             ModeResult::Failure (
                 _Mode::convert_error(TestError {
                     encountered_item: Some(item),
@@ -97,13 +97,13 @@ impl<'a> Input<'a> for TestInput {
 
     fn peek(&'a self) -> Option<Self::Item> { self.items.get(self.cursor) }
 
-    fn restore(&self, position: usize) {
+    fn restore_cursor(&self, position: usize) {
         unsafe {
             let mutable: *mut Self = self as *const Self as *mut Self;
             (*mutable).cursor = position;
         }
     }
 
-    fn save(&self) -> usize { self.cursor }
+    fn save_cursor(&self) -> usize { self.cursor }
 
 }

@@ -19,7 +19,7 @@ impl<'a, I> Parser<'a, I> for Token
 where
     I: Input<'a> + TextInput,
 {
-    type Output = &'a str;
+    type Output = &'static str;
 
     type Error = ();
 
@@ -28,7 +28,7 @@ where
     fn apply<_Mode: Mode>(
         &self,
         input: &'a I
-    ) -> ModeResult<&'a str, (), (), _Mode> {
+    ) -> ModeResult<&'static str, (), (), _Mode> {
         if input.starts_with(self.0) {
             Success (_Mode::convert_output(self.0), _Mode::new_message_container())
         } else {

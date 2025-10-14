@@ -26,9 +26,9 @@ pub trait Input<'a> {
     fn peek(&'a self) -> Option<Self::Item>;
 
     /// Restores the cursor of this `Input` to a given position
-    fn restore(&self, position: usize);
+    fn restore_cursor(&self, position: usize);
 
     /// Saves the position of the cursor of this `Input`
-    fn save(&self) -> usize;
+    fn save_cursor(&self) -> usize;
 
 }

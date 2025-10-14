@@ -23,7 +23,7 @@ where
     C: Character,
     I: Input<'a, Item = C> + TextInput,
 {
-    type Output = String;
+    type Output = I::Slice;
 
     type Error = ();
 
@@ -32,21 +32,21 @@ where
     fn apply<_Mode: Mode>(
         &self,
         input: &'a I
-    ) -> ModeResult<String, (), (), _Mode> {
-        let mut whitespace: _Mode::OutputForm<String> = _Mode::convert_output(String::new());
-        let mut not_empty: bool = false;
+    ) -> ModeResult<I::Slice , (), (), _Mode> {
+        let start: usize = input.save_cursor();
         loop {
-            let cursor: usize = input.save();
+            let cursor: usize = input.save_cursor();
             let Some (character) = input.next() else { break };
-            if !character.is_whitespace() { input.restore(cursor); break }
-            whitespace = _Mode::merge_outputs(
-                whitespace,
-                _Mode::convert_output(character),
-                |mut ws, c: C| { c.write(&mut ws); ws }
-            );
-            not_empty = true;
+            if !character.is_whitespace() { input.restore_cursor(cursor); break }
         }
-        if not_empty { Success (whitespace, _Mode::new_message_container()) }
+        let length: usize = input.save_cursor() - start;
+        if length > 0 {
+            input.restore_cursor(start);
+            Success (
+                _Mode::convert_output(input.consume(length).unwrap()),
+                _Mode::new_message_container()
+            )
+        }
         else { Failure (_Mode::convert_error(()), _Mode::new_message_container())}
     }
 

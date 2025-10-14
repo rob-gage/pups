@@ -29,7 +29,7 @@ where
 /// Parses a given lexeme from text
 pub const fn token<'a, I>(
     lexeme: &'static str
-) -> impl Parser<'a, I, Output = &'a str, Error = (), Message = ()>
+) -> impl Parser<'a, I, Output = &'static str, Error = (), Message = ()>
 where
     I: Input<'a> + TextInput,
 { Token (lexeme) }
@@ -37,7 +37,7 @@ where
 
 /// Parses a unicode identifier
 pub const fn unicode_identifier<'a, C, I>(
-) -> impl Parser<'a, I, Output = String, Error = (), Message = ()>
+) -> impl Parser<'a, I, Output = I::Slice, Error = (), Message = ()>
 where
     C: Character,
     I: Input<'a, Item = C> + TextInput,
@@ -45,7 +45,8 @@ where
 
 
 /// Parses whitespace
-pub const fn whitespace<'a, C, I>() -> impl Parser<'a, I, Output = String, Error = (), Message = ()>
+pub const fn whitespace<'a, C, I>(
+) -> impl Parser<'a, I, Output = I::Slice, Error = (), Message = ()>
 where
     C: Character,
     I: Input<'a, Item = C> + TextInput,
