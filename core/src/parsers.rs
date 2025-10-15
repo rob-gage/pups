@@ -17,6 +17,7 @@ use crate::{
     Parse,
     ModeResult,
 };
+use std::marker::PhantomData;
 
 use choice::Choice;
 use end::End;
@@ -34,7 +35,7 @@ use sequenced::Sequenced;
 
 
 /// Implementors can be parsed from an input type
-pub trait Parser<'a, I>
+pub trait Parser<'a, O, E, M, I>
 where
     Self: Sized,
     I: Input<'a>
@@ -42,33 +43,24 @@ where
 
     // PARSER IMPLEMENTATION
 
-    /// The output type that is parsed by this parser
-    type Output: Sized;
-
-    /// The type for errors that can occur with this parser
-    type Error: Sized;
-
-    /// The type for messages that may be returned by this parser
-    type Message: Sized;
-
     /// Applies a parser
     fn apply<_Mode: Mode>(
         &self,
         input: &'a I
-    ) -> ModeResult<Self::Output, Self::Error, Self::Message, _Mode>;
+    ) -> ModeResult<O, E, M, _Mode>;
 
     /// Checks that the input matches this parser, and consumes matched input
     fn check(
         &self,
         input: &'a I,
-    ) -> ModeResult<Self::Output, Self::Error, Self::Message, Check>
+    ) -> ModeResult<O, E, M, Check>
     { self.apply::<Check>(input) }
 
     /// Checks that the input matches this parser, and consumes matched input
     fn parse(
         &self,
         input: &'a I,
-    ) -> ModeResult<Self::Output, Self::Error, Self::Message, Parse>
+    ) -> ModeResult<O, E, M, Parse>
     { self.apply::<Parse>(input) }
 
     // COMBINATOR METHODS
@@ -78,91 +70,80 @@ where
     fn catch<P>(
         self,
         fallback: P
-    ) -> impl Parser<'a, I, Output = Self::Output, Error = Self::Error, Message = Self::Message>
+    ) -> impl Parser<'a, O, E, M, I>
     where
-        P: Parser<'a, I, Output = Self::Output, Error = Self::Error, Message = Self::Message>
+        P: Parser<'a, O, E, M, I>
     { Recoverable { fallback, parser: self } }
 
-    /// Ignores this parser's result and then applies another
-    fn ignore_then<P, O>(
-        self,
-        next: P
-    ) -> impl Parser<'a, I, Output = O, Error = Self::Error, Message = Self::Message>
-    where
-        P: Parser<'a, I, Output = O, Error = Self::Error, Message = Self::Message>
-    { preceded(self, next) }
-
     /// Tries another parser if this one fails
-    fn or<P, E>(
+    fn or<P, _E>(
         self,
         alternate: P
-    ) -> impl Parser<'a, I, Output = Self::Output, Error = (Self::Error, E), Message = Self::Message>
+    ) -> impl Parser<'a, O, (E, _E), M, I>
     where
-        P: Parser<'a, I, Output = Self::Output, Error = E, Message = Self::Message>
+        P: Parser<'a, O, _E, M, I>
     {  Choice { primary: self, alternate } }
 
     /// Applies a parser optionally, returning `None` instead of an error if it fails
-    fn or_not(
-        self
-    ) -> impl Parser<'a, I, Output = Option<Self::Output>, Error = Self::Error, Message = Self::Message>
+    fn or_not(self) -> impl Parser<'a, Option<O>, E, M, I>
     { optional(self) }
 
     /// Maps a parser's output to another type using a function
-    fn map<O>(
+    fn map<_O>(
         self,
-        f: impl Fn(Self::Output) -> O + Clone
-    ) -> impl Parser<'a, I, Output = O, Error = Self::Error, Message = Self::Message> {
-        OutputMapped { parser: self, function: f }
-    }
+        f: impl Fn(O) -> _O + Clone
+    ) -> impl Parser<'a, _O, E, M, I>
+    { OutputMapped { parser: self, function: f, _phantom: PhantomData } }
 
     /// Maps a parser's error to another type using a function
-    fn map_error<E>(
+    fn map_error<_E>(
         self,
-        f: impl Fn(Self::Error) -> E + Clone
-    ) -> impl Parser<'a, I, Output = Self::Output, Error = E, Message = Self::Message> {
-        ErrorMapped { parser: self, function: f }
-    }
+        f: impl Fn(E) -> _E + Clone
+    ) -> impl Parser<'a, O, _E, M, I>
+    { ErrorMapped { parser: self, function: f, _phantom: PhantomData } }
 
     /// Maps a parser's messages to another type using a function
-    fn map_messages<M>(
+    fn map_messages<_M>(
         self,
-        f: impl Fn(Self::Message) -> M + Clone
-    ) -> impl Parser<'a, I, Output = Self::Output, Error = Self::Error, Message = M> {
-        MessagesMapped { parser: self, function: f }
-    }
+        f: impl Fn(M) -> _M + Clone
+    ) -> impl Parser<'a, O, E, _M, I>
+    { MessagesMapped { parser: self, function: f, _phantom: PhantomData } }
 
     /// Applies another parser in sequence after this one, and returns both results as a tuple
-    fn then<P, O>(
+    fn then<P, _O>(
         self,
         next: P
-    ) -> impl Parser<'a, I, Output = (Self::Output, O), Error = Self::Error, Message = Self::Message>
+    ) -> impl Parser<'a, (O, _O), E, M, I>
     where
-        P: Parser<'a, I, Output = O, Error = Self::Error, Message = Self::Message>
+        P: Parser<'a, _O, E, M, I>
     { Sequenced { head: self, tail: next } }
 
     /// Applies another parser in sequence after this one, but ignores its result
-    fn then_ignore<P, O>(
+    fn then_ignore<P, _O>(
         self,
         next: P
-    ) -> impl Parser<'a, I, Output = Self::Output, Error = Self::Error, Message = Self::Message>
+    ) -> impl Parser<'a, O, E, M, I>
     where
-        P: Parser<'a, I, Output = O, Error = Self::Error, Message = Self::Message>
+        P: Parser<'a, _O, E, M, I>
     { terminated(self, next) }
+
+    /// Ignores this parser's result and then applies another
+    fn ignore_then<P, _O>(
+        self,
+        next: P
+    ) -> impl Parser<'a, _O, E, M, I>
+    where
+        P: Parser<'a, _O, E, M, I>
+    { preceded(self, next) }
 
 }
 
 
-impl<'a, O, E, M, F, I> Parser<'a, I> for F
+impl<'a, O, E, M, F, I> Parser<'a, O, E, M, I> for F
 where
     F: Fn(&'a I) -> ModeResult<O, E, M, Parse>,
     I: Input<'a> +'a
 {
-
-    type Output = O;
-
-    type Error = E;
-
-    type Message = M;
 
     fn apply<_Mode: Mode>(&self, input: &'a I) -> ModeResult<O, E, M, _Mode> {
         _Mode::apply_parser(self, input)
@@ -184,84 +165,92 @@ pub fn delimited<'a, O1, O2, O3, E, M, I, P1, P2, P3>(
     prefix: P1,
     parser: P2,
     terminator: P3,
-) -> impl Parser<'a, I, Error = E, Output = O2, Message = M>
+) -> impl Parser<'a, O2, E, M, I>
 where
     I: Input<'a>,
-    P1: Parser<'a, I, Output = O1, Error = E, Message = M>,
-    P2: Parser<'a, I, Output = O2, Error = E, Message = M>,
-    P3: Parser<'a, I, Output = O3, Error = E, Message = M>,
+    P1: Parser<'a, O1, E, M, I>,
+    P2: Parser<'a, O2, E, M, I>,
+    P3: Parser<'a, O3, E, M, I>,
 { preceded(prefix, terminated(parser, terminator)) }
 
 /// Matches the end of the provided input
-pub const fn end<'a, I>() -> impl Parser<'a, I, Output = (), Error = (), Message = ()>
+pub const fn end<'a, I>() -> impl Parser<'a, (), (), (), I>
 where
     I: Input<'a>,
 { End }
 
 /// Parses absolutely nothing
-pub const fn nothing<'a, E, M, I>() -> impl Parser<'a, I, Output = (), Error = E, Message = M>
+pub const fn nothing<'a, E, M, I>() -> impl Parser<'a, (), E, M, I>
 where
     I: Input<'a>,
-{ Nothing::new() }
+{ Nothing (PhantomData) }
 
 /// Iterates application of a parser
 pub const fn many<'a, O, E, M, I, P>(
     parser: P,
-) -> impl Parser<'a, I, Output = Vec<O>, Error = E, Message = M> where
+) -> impl Parser<'a, Vec<O>, E, M, I>
+where
     I: Input<'a>,
-    P: Parser<'a, I, Output = O, Error = E, Message = M>,
+    P: Parser<'a, O, E, M, I>,
 { separated(parser, nothing()) }
 
 /// Optionally applies a parser, converting a failure into `Option::None`
 pub const fn optional<'a, O, E, M, I, P>(
     parser: P,
-) -> impl Parser<'a, I, Output = Option<O>, Error = E, Message = M> where
+) -> impl Parser<'a, Option<O>, E, M, I>
+where
     I: Input<'a>,
-    P: Parser<'a, I, Output = O, Error = E, Message = M>,
+    P: Parser<'a, O, E, M, I>,
 { Optional (parser) }
 
 /// Consumes input until a parser can be applied successfully or there is no input left
 pub const fn seek<'a, O, E, M, I, P>(
     parser: P,
-) -> impl Parser<'a, I, Output = Option<O>, Error = E, Message = M> where
+) -> impl Parser<'a, Option<O>, E, M, I>
+where
     I: Input<'a>,
-    P: Parser<'a, I, Output = O, Error = E, Message = M>,
+    P: Parser<'a, O, E, M, I>,
 { FirstMatch (parser) }
 
 /// Applies a parser after an ignored prefix parser
 pub const fn preceded<'a, O1, O2, E,  M, I, P1, P2>(
     prefix: P1,
     parser: P2
-) -> impl Parser<'a, I, Output = O2, Error = E, Message = M> where
+) -> impl Parser<'a, O2, E, M, I>
+where
     I: Input<'a>,
-    P1: Parser<'a, I, Output = O1, Error = E, Message = M>,
-    P2: Parser<'a, I, Output = O2, Error = E, Message = M>,
+    P1: Parser<'a, O1, E, M, I>,
+    P2: Parser<'a, O2, E, M, I>,
 { OutputMapped {
     parser: Sequenced { head: prefix, tail: parser },
-    function: |(_, output)| output
+    function: |(_, output)| output,
+    _phantom: PhantomData
 } }
 
 /// Iterates application of a parser separated by application of another parser
 pub const fn separated<'a, E, I, M, O1, O2, P1, P2>(
     parser: P1,
     separator: P2
-) -> impl Parser<'a, I, Output = Vec<O1>, Error = E, Message = M> where
+) -> impl Parser<'a, Vec<O1>, E, M, I>
+where
     I: Input<'a>,
-    P1: Parser<'a, I, Output = O1, Error = E, Message = M>,
-    P2: Parser<'a, I, Output = O2, Error = E, Message = M>,
-{ Iterated { maximum: None, minimum: 0, parser, separator } }
+    P1: Parser<'a, O1, E, M, I>,
+    P2: Parser<'a, O2, E, M, I>,
+{ Iterated { maximum: None, minimum: 0, parser, separator, _phantom: PhantomData } }
 
 /// Applies a parser followed by an ignored terminator parser
 pub const fn terminated<'a, O1, O2, E, M, I, P1, P2>(
     parser: P1,
     terminator: P2
-) -> impl Parser<'a, I, Output = O1, Error = E, Message = M> where
+) -> impl Parser<'a, O1, E, M, I>
+where
     I: Input<'a>,
-    P1: Parser<'a, I, Output = O1, Error = E, Message = M>,
-    P2: Parser<'a, I, Output = O2, Error = E, Message = M>,
+    P1: Parser<'a, O1, E, M, I>,
+    P2: Parser<'a, O2, E, M, I>,
 {
     OutputMapped {
         parser: Sequenced { head: parser, tail: terminator },
-        function: |(output, _)| output
+        function: |(output, _)| output,
+        _phantom: PhantomData,
     }
 }

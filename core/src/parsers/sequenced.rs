@@ -19,16 +19,12 @@ pub struct Sequenced<P1, P2> {
     pub tail: P2,
 }
 
-impl<'a, E, I, M, O1, O2, P1, P2> Parser<'a, I> for Sequenced<P1, P2> where
+impl<'a, O1, O2, E, M, I, P1, P2> Parser<'a, (O1, O2), E, M, I> for Sequenced<P1, P2>
+where
     I: Input<'a>,
-    P1: Parser<'a, I, Output = O1, Error = E, Message = M>,
-    P2: Parser<'a, I, Output = O2, Error = E, Message = M>,
+    P1: Parser<'a, O1, E, M, I>,
+    P2: Parser<'a, O2, E, M, I>,
 {
-    type Output = (O1, O2);
-
-    type Error = E;
-
-    type Message = M;
 
     fn apply<_Mode: Mode>(
         &self,

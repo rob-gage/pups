@@ -16,17 +16,11 @@ use crate::{
 /// exists
 pub struct FirstMatch<P> (pub P);
 
-impl<'a, E, I, M, O, P> Parser<'a, I> for FirstMatch<P>
+impl<'a, O, E, M, I, P> Parser<'a, Option<O>, E, M, I> for FirstMatch<P>
 where
     I: Input<'a>,
-    P: Parser<'a, I, Output = O, Error = E, Message = M>,
+    P: Parser<'a, O, E, M, I>,
 {
-
-    type Output = Option<O>;
-
-    type Error = E;
-
-    type Message = M;
 
     fn apply<_Mode: Mode>(&self, input: &'a I) -> ModeResult<Option<O>, E, M, _Mode> {
         while let Some(_) = input.peek() {

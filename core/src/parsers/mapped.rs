@@ -6,32 +6,30 @@ use crate::{
     ModeResult,
     Parser
 };
+use std::marker::PhantomData;
 
 
 /// A combinator that maps the output type of a parser to another type
-pub struct OutputMapped<F, P> {
+pub struct OutputMapped<OA, F, P> {
     /// The parser whose output is mapped
     pub parser: P,
     /// The function used to map the output of the parser
     pub function: F,
+    pub _phantom: PhantomData<OA>,
 }
 
 
-impl<'a, E, F, I, M, P, OA, OB> Parser<'a, I> for OutputMapped<F, P> where
+impl<'a, OA, OB, E, M, F, I, P> Parser<'a, OB, E, M, I> for OutputMapped<OA, F, P>
+where
     F: Fn(OA) -> OB + Clone,
     I: Input<'a>,
-    P: Parser<'a, I, Output = OA, Error = E, Message = M>,
+    P: Parser<'a, OA, E, M, I>,
 {
-    type Output = OB;
-
-    type Error = E;
-
-    type Message = M;
 
     fn apply<_Mode: Mode>(
         &self,
         input: &'a I
-    ) -> ModeResult<Self::Output, Self::Error, Self::Message, _Mode> {
+    ) -> ModeResult<OB, E, M, _Mode> {
         _Mode::map_output(
             self.parser.apply::<_Mode>(input),
             self.function.clone()
@@ -43,29 +41,25 @@ impl<'a, E, F, I, M, P, OA, OB> Parser<'a, I> for OutputMapped<F, P> where
 
 
 /// A combinator that maps the error type of a parser to another type
-pub struct ErrorMapped<F, P> {
+pub struct ErrorMapped<EA, F, P> {
     /// The parser whose error is mapped
     pub parser: P,
     /// The function used to map the error of the parser
     pub function: F,
+    pub _phantom: PhantomData<EA>
 }
 
 
-impl<'a, EA, EB, F, I, M, P, O> Parser<'a, I> for ErrorMapped<F, P> where
+impl<'a, O, EA, EB, M, F, I, P> Parser<'a, O, EB, M, I> for ErrorMapped<EA, F, P>
+where
     F: Fn(EA) -> EB + Clone,
     I: Input<'a>,
-    P: Parser<'a, I, Output = O, Error = EA, Message = M>,
+    P: Parser<'a, O, EA, M, I>,
 {
-    type Output = O;
-
-    type Error = EB;
-
-    type Message = M;
-
     fn apply<_Mode: Mode>(
         &self,
         input: &'a I
-    ) -> ModeResult<Self::Output, Self::Error, Self::Message, _Mode> {
+    ) -> ModeResult<O, EB, M, _Mode> {
         _Mode::map_error(
             self.parser.apply::<_Mode>(input),
             self.function.clone()
@@ -77,29 +71,26 @@ impl<'a, EA, EB, F, I, M, P, O> Parser<'a, I> for ErrorMapped<F, P> where
 
 
 /// A combinator that maps the message type of a parser to another type
-pub struct MessagesMapped<F, P> {
+pub struct MessagesMapped<MA, F, P> {
     /// The parser whose messages are mapped
     pub parser: P,
     /// The function used to map the messages of the parser
     pub function: F,
+    pub _phantom: PhantomData<MA>,
 }
 
 
-impl<'a, E, F, I, MA, MB, P, O> Parser<'a, I> for MessagesMapped<F, P> where
+impl<'a, O, E, MA, MB, F, I, P> Parser<'a, O, E, MB, I> for MessagesMapped<MA, F, P>
+where
     F: Fn(MA) -> MB + Clone,
     I: Input<'a>,
-    P: Parser<'a, I, Output = O, Error = E, Message = MA>,
+    P: Parser<'a, O, E, MA, I>,
 {
-    type Output = O;
-
-    type Error = E;
-
-    type Message = MB;
 
     fn apply<_Mode: Mode>(
         &self,
         input: &'a I
-    ) -> ModeResult<Self::Output, Self::Error, Self::Message, _Mode> {
+    ) -> ModeResult<O, E, MB, _Mode> {
         _Mode::map_messages(
             self.parser.apply::<_Mode>(input),
             self.function.clone()

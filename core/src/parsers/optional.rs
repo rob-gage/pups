@@ -15,17 +15,11 @@ use crate::{
 /// A combinator that applies a parser optionally
 pub struct Optional<P> (pub P);
 
-impl<'a, E, I, M, O, P> Parser<'a, I> for Optional<P>
+impl<'a, O, E, M, I, P> Parser<'a, Option<O>, E, M, I> for Optional<P>
 where
     I: Input<'a>,
-    P: Parser<'a, I, Output = O, Error = E, Message = M>,
+    P: Parser<'a, O, E, M, I>,
 {
-
-    type Output = Option<O>;
-
-    type Error = E;
-
-    type Message = M;
 
     fn apply<_Mode: Mode>(&self, input: &'a I) -> ModeResult<Option<O>, E, M, _Mode> {
         match self.0.apply::<_Mode>(input) {

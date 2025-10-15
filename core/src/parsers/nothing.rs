@@ -16,23 +16,10 @@ use std::marker::PhantomData;
 /// Parses absolutely nothing
 pub struct Nothing<E, M> (pub PhantomData<(E, M)>);
 
-impl<E, M> Nothing<E, M> {
-
-    /// Creates a new `Nothing`
-    pub const fn new() -> Self { Self(PhantomData) }
-
-}
-
-impl<'a, E, M, I> Parser<'a, I> for Nothing<E, M>
+impl<'a, E, M, I> Parser<'a, (), E, M, I> for Nothing<E, M>
 where
     I: Input<'a>,
 {
-
-    type Output = ();
-
-    type Error = E;
-
-    type Message = M;
 
     fn apply<_Mode: Mode>(&self, input: &'a I) -> ModeResult<(), E, M, _Mode> {
         Success (_Mode::convert_output(()), _Mode::new_message_container())

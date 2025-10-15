@@ -33,7 +33,7 @@ where
     ) -> ModeResult<O, E, M, Self>
     where
         I: Input<'a>,
-        P: Parser<'a, I, Output = O, Error = E, Message = M>;
+        P: Parser<'a, O, E, M, I>;
 
     /// Converts an output to its representational form in this mode
     fn convert_output<O>(output: impl Into<O>) -> Self::OutputForm<O>;
@@ -102,7 +102,7 @@ impl Mode for Check {
     fn apply_parser<'a, O, E, M, I, P>(parser: P, input: &'a I) -> ModeResult<O, E, M, Self>
     where
         I: Input<'a, >,
-        P: Parser<'a, I, Output = O, Error = E, Message = M>,
+        P: Parser<'a, O, E, M, I>,
     { parser.check(input) }
 
     fn convert_output<O>(_: impl Into<O>) -> () { () }
@@ -168,7 +168,7 @@ impl Mode for Parse {
     fn apply_parser<'a, O, E, M, I, P>(parser: P, input: &'a I) -> ModeResult<O, E, M, Self>
     where
         I: Input<'a>,
-        P: Parser<'a, I, Output = O, Error = E, Message = M>,
+        P: Parser<'a, O, E, M, I>,
     { parser.parse(input) }
 
     fn convert_output<O>(output: impl Into<O>) -> O { output.into() }

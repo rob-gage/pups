@@ -21,17 +21,11 @@ pub struct Choice<P1, P2> {
     pub primary: P1,
 }
 
-impl<'a, E1, E2, I, M, O, P1, P2> Parser<'a, I> for Choice<P1, P2> where
+impl<'a, O, E1, E2, M, I, P1, P2> Parser<'a, O, (E1, E2), M, I> for Choice<P1, P2> where
     I: Input<'a>,
-    P1: Parser<'a, I, Output = O, Error = E1, Message = M>,
-    P2: Parser<'a, I, Output = O, Error = E2, Message = M>,
+    P1: Parser<'a, O, E1, M, I>,
+    P2: Parser<'a, O, E2, M, I>,
 {
-
-    type Output = O;
-
-    type Error = (E1, E2);
-
-    type Message = M;
 
     fn apply<_Mode: Mode>(&self, input: &'a I) -> ModeResult<O, (E1, E2), M, _Mode> {
         match self.primary.apply::<_Mode>(input) {

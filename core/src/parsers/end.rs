@@ -15,16 +15,10 @@ use crate::{
 /// Requires that there be no input remaining
 pub struct End;
 
-impl<'a, I> Parser<'a, I> for End
+impl<'a, I> Parser<'a, (), (), (), I> for End
 where
     I: Input<'a>,
 {
-
-    type Output = ();
-
-    type Error = ();
-
-    type Message = ();
 
     fn apply<_Mode: Mode>(&self, input: &'a I) -> ModeResult<(), (), (), _Mode> {
         if input.peek().is_some() {  Failure (

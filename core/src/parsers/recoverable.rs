@@ -19,17 +19,12 @@ pub struct Recoverable<P1, P2> {
     pub parser: P1,
 }
 
-impl<'a, E, I, M, O, P1, P2> Parser<'a, I> for Recoverable<P1, P2> where
+impl<'a, O, E, M, I, P1, P2> Parser<'a, O, E, M, I> for Recoverable<P1, P2>
+where
     I: Input<'a>,
-    P1: Parser<'a, I, Output = O, Error = E, Message = M>,
-    P2: Parser<'a, I, Output = O, Error = E, Message = M>,
+    P1: Parser<'a, O, E, M, I>,
+    P2: Parser<'a, O, E, M, I>,
 {
-
-    type Output = O;
-
-    type Error = E;
-
-    type Message = M;
 
     fn apply<_Mode: Mode>(&self, input: &'a I) -> ModeResult<O, E, M, _Mode> {
         match self.parser.apply::<_Mode>(input) {

@@ -10,9 +10,10 @@ use crate::{
     },
     Parser
 };
+use std::marker::PhantomData;
 
 /// A combinator that applies a parser in multiple iterations
-pub struct Iterated<P1, P2> {
+pub struct Iterated<O2, P1, P2> {
     /// The maximum number of parser iterations that this combinator applies
     pub maximum: Option<usize>,
     /// The minimum number of parser iterations that this combinator applies
@@ -21,9 +22,10 @@ pub struct Iterated<P1, P2> {
     pub parser: P1,
     /// The parser that is applied in between iterations
     pub separator: P2,
+    pub _phantom: PhantomData<O2>,
 }
 
-impl<P1, P2> Iterated<P1, P2> {
+impl<O2, P1, P2> Iterated<O2, P1, P2> {
 
     /// Requires that this iterated parser combinator parse at least a given number of outputs
     pub const fn at_least(mut self, minimum: usize) -> Self {
@@ -39,17 +41,12 @@ impl<P1, P2> Iterated<P1, P2> {
 
 }
 
-impl<'a, O1, O2, E, M, I, P1, P2> Parser<'a, I> for Iterated<P1, P2>
+impl<'a, O1, O2, E, M, I, P1, P2> Parser<'a, Vec<O1>, E, M, I> for Iterated<O2, P1, P2>
 where
     I: Input<'a>,
-    P1: Parser<'a, I, Output = O1, Error = E, Message = M>,
-    P2: Parser<'a, I, Output = O2, Error = E, Message = M>,
+    P1: Parser<'a, O1, E, M, I>,
+    P2: Parser<'a, O2, E, M, I>,
 {
-    type Output = Vec<O1>;
-
-    type Error = E;
-
-    type Message = M;
 
     fn apply<_Mode: Mode>(
         &self,

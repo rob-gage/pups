@@ -14,13 +14,7 @@ enum TestItem {
     C (isize),
 }
 
-impl<'a> Parser<'a, TestInput> for TestItem {
-
-    type Output = &'a TestItem;
-
-    type Error = TestError<'a>;
-
-    type Message = ();
+impl<'a> Parser<'a, &'a TestItem, TestError<'a>, (), TestInput> for TestItem {
 
     fn apply<_Mode: Mode>(
         &self,
