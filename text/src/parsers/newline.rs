@@ -18,16 +18,11 @@ use pups_core::{
 /// Parses a lexical token
 pub struct Newline;
 
-impl<'a, C, I> Parser<'a, I> for Newline
+impl<'a, C, I> Parser<'a, (), (), (), I> for Newline
 where
     C: Character,
     I: Input<'a, Item = C> + TextInput,
 {
-    type Output = ();
-
-    type Error = ();
-
-    type Message = ();
 
     fn apply<_Mode: Mode>(
         &self,

@@ -15,15 +15,10 @@ use pups_core::{
 /// Parses a lexical token
 pub struct Token (pub &'static str);
 
-impl<'a, I> Parser<'a, I> for Token
+impl<'a, I> Parser<'a, &'static str, (), (), I> for Token
 where
     I: Input<'a> + TextInput,
 {
-    type Output = &'static str;
-
-    type Error = ();
-
-    type Message = ();
 
     fn apply<_Mode: Mode>(
         &self,

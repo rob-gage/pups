@@ -18,16 +18,11 @@ use pups_core::{
 /// Parses a unicode identifier
 pub struct UnicodeIdentifier;
 
-impl<'a, C, I> Parser<'a, I> for UnicodeIdentifier
+impl<'a, C, I> Parser<'a, I::Slice, (), (), I> for UnicodeIdentifier
 where
     C: Character,
     I: Input<'a, Item = C> + TextInput,
 {
-    type Output = I::Slice;
-
-    type Error = ();
-
-    type Message = ();
 
     fn apply<_Mode: Mode>(
         &self,

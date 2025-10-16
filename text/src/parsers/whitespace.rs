@@ -18,16 +18,11 @@ use pups_core::{
 /// Parses whitespace
 pub struct Whitespace;
 
-impl<'a, C, I> Parser<'a, I> for Whitespace
+impl<'a, C, I> Parser<'a, I::Slice, (), (), I> for Whitespace
 where
     C: Character,
     I: Input<'a, Item = C> + TextInput,
 {
-    type Output = I::Slice;
-
-    type Error = ();
-
-    type Message = ();
 
     fn apply<_Mode: Mode>(
         &self,

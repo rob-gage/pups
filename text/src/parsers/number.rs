@@ -18,17 +18,11 @@ use pups_core::{
 /// Parses a number
 pub struct Number;
 
-impl<'a, C, I> Parser<'a, I> for Number
+impl<'a, C, I> Parser<'a, I::Slice, (), (), I> for Number
 where
     C: Character,
     I: Input<'a, Item = C> + TextInput,
 {
-    type Output = I::Slice;
-
-    type Error = ();
-
-    type Message = ();
-
     fn apply<_Mode: Mode>(
         &self,
         input: &'a I
