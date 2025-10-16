@@ -41,8 +41,6 @@ where
     I: Input<'a>
 {
 
-    // PARSER IMPLEMENTATION
-
     /// Applies a parser
     fn apply<_Mode: Mode>(
         &self,
@@ -63,81 +61,7 @@ where
     ) -> ModeResult<O, E, M, Parse>
     { self.apply::<Parse>(input) }
 
-    // COMBINATOR METHODS
-
-    /// If necessary, runs a fallback parser to recover from the failure of the original parser
-    /// while preserving all messages from the original parser
-    fn catch<P>(
-        self,
-        fallback: P
-    ) -> impl Parser<'a, O, E, M, I>
-    where
-        P: Parser<'a, O, E, M, I>
-    { Recoverable { fallback, parser: self } }
-
-    /// Tries another parser if this one fails
-    fn or<P, _E>(
-        self,
-        alternate: P
-    ) -> impl Parser<'a, O, (E, _E), M, I>
-    where
-        P: Parser<'a, O, _E, M, I>
-    {  Choice { primary: self, alternate } }
-
-    /// Applies a parser optionally, returning `None` instead of an error if it fails
-    fn or_not(self) -> impl Parser<'a, Option<O>, E, M, I>
-    { optional(self) }
-
-    /// Maps a parser's output to another type using a function
-    fn map<_O>(
-        self,
-        f: impl Fn(O) -> _O + Clone
-    ) -> impl Parser<'a, _O, E, M, I>
-    { OutputMapped { parser: self, function: f, _phantom: PhantomData } }
-
-    /// Maps a parser's error to another type using a function
-    fn map_error<_E>(
-        self,
-        f: impl Fn(E) -> _E + Clone
-    ) -> impl Parser<'a, O, _E, M, I>
-    { ErrorMapped { parser: self, function: f, _phantom: PhantomData } }
-
-    /// Maps a parser's messages to another type using a function
-    fn map_messages<_M>(
-        self,
-        f: impl Fn(M) -> _M + Clone
-    ) -> impl Parser<'a, O, E, _M, I>
-    { MessagesMapped { parser: self, function: f, _phantom: PhantomData } }
-
-    /// Applies another parser in sequence after this one, and returns both results as a tuple
-    fn then<P, _O>(
-        self,
-        next: P
-    ) -> impl Parser<'a, (O, _O), E, M, I>
-    where
-        P: Parser<'a, _O, E, M, I>
-    { Sequenced { head: self, tail: next } }
-
-    /// Applies another parser in sequence after this one, but ignores its result
-    fn then_ignore<P, _O>(
-        self,
-        next: P
-    ) -> impl Parser<'a, O, E, M, I>
-    where
-        P: Parser<'a, _O, E, M, I>
-    { terminated(self, next) }
-
-    /// Ignores this parser's result and then applies another
-    fn ignore_then<P, _O>(
-        self,
-        next: P
-    ) -> impl Parser<'a, _O, E, M, I>
-    where
-        P: Parser<'a, _O, E, M, I>
-    { preceded(self, next) }
-
 }
-
 
 impl<'a, O, E, M, F, I> Parser<'a, O, E, M, I> for F
 where
@@ -194,6 +118,33 @@ where
     P: Parser<'a, O, E, M, I>,
 { separated(parser, nothing()) }
 
+/// Maps a parser's output to another type using a function
+pub const fn mapped<'a, OA, OB, E, M, I>(
+    parser: impl Parser<'a, OA, E, M, I>,
+    function: impl Fn(OA) -> OB + Clone
+) -> impl Parser<'a, OB, E, M, I>
+where
+    I: Input<'a>,
+{ OutputMapped { parser, function, _phantom: PhantomData } }
+
+/// Maps a parser's output to another type using a function
+pub const fn mapped_errors<'a, O, EA, EB, M, I>(
+    parser: impl Parser<'a, O, EA, M, I>,
+    function: impl Fn(EA) -> EB + Clone
+) -> impl Parser<'a, O, EB, M, I>
+where
+    I: Input<'a>,
+{ ErrorMapped { parser, function, _phantom: PhantomData } }
+
+/// Maps a parser's output to another type using a function
+pub const fn mapped_messages<'a, O, E, MA, MB, I>(
+    parser: impl Parser<'a, O, E, MA, I>,
+    function: impl Fn(MA) -> MB + Clone
+) -> impl Parser<'a, O, E, MB, I>
+where
+    I: Input<'a>,
+{ MessagesMapped { parser, function, _phantom: PhantomData } }
+
 /// Optionally applies a parser, converting a failure into `Option::None`
 pub const fn optional<'a, O, E, M, I, P>(
     parser: P,
@@ -227,6 +178,17 @@ where
     _phantom: PhantomData
 } }
 
+/// Applies a parser, but uses another one to recover if the first fails, keeping messages from both
+pub const fn recoverable<'a, O, E, M, I, P1, P2>(
+    parser: P1,
+    fallback: P2
+) -> impl Parser<'a, O, E, M, I>
+where
+    I: Input<'a>,
+    P1: Parser<'a, O, E, M, I>,
+    P2: Parser<'a, O, E, M, I>,
+{ Recoverable { fallback, parser } }
+
 /// Iterates application of a parser separated by application of another parser
 pub const fn separated<'a, E, I, M, O1, O2, P1, P2>(
     parser: P1,
@@ -237,6 +199,17 @@ where
     P1: Parser<'a, O1, E, M, I>,
     P2: Parser<'a, O2, E, M, I>,
 { Iterated { maximum: None, minimum: 0, parser, separator, _phantom: PhantomData } }
+
+/// Applies a parser followed by another parser, and returns the outputs as a tuple
+pub const fn sequenced<'a, O1, O2, E, M, I, P1, P2>(
+    first: P1,
+    second: P2
+) -> impl Parser<'a, (O1, O2), E, M, I>
+where
+    I: Input<'a>,
+    P1: Parser<'a, O1, E, M, I>,
+    P2: Parser<'a, O2, E, M, I>,
+{ Sequenced { head: first, tail: second } }
 
 /// Applies a parser followed by an ignored terminator parser
 pub const fn terminated<'a, O1, O2, E, M, I, P1, P2>(
