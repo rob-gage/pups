@@ -1,6 +1,7 @@
 // Copyright Rob Gage 2025
 
 use pups_core::{
+    implement_modes,
     Input,
     prelude::*,
     Mode
@@ -49,6 +50,8 @@ impl<'a> Parser<'a, &'a TestItem, TestError<'a>, (), TestInput> for TestItem {
             )
         }
     }
+
+    implement_modes!('a, &'a TestItem, TestError<'a>, (), TestInput);
 
 }
 

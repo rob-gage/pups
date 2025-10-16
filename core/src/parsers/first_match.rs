@@ -1,6 +1,7 @@
 // Copyright Rob Gage 2025
 
 use crate::{
+    implement_modes,
     Input,
     Mode,
     ModeResult::{
@@ -31,5 +32,7 @@ where
         }
         Success (_Mode::convert_output(None), _Mode::new_message_container())
     }
+
+    implement_modes!('a, Option<O>, E, M, I);
 
 }

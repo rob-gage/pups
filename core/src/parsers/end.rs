@@ -1,6 +1,7 @@
 // Copyright Rob Gage 2025
 
 use crate::{
+    implement_modes,
     Input,
     Mode,
     ModeResult::{
@@ -29,5 +30,7 @@ where
             _Mode::new_message_container()
         )}
     }
+
+    implement_modes!('a, (), (), (), I);
 
 }

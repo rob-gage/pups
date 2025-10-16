@@ -1,6 +1,7 @@
 // Copyright Rob Gage 2025
 
 use crate::{
+    implement_modes,
     Input,
     Mode,
     ModeResult::{
@@ -53,5 +54,7 @@ where
             Failure (head_error, head_messages) => Failure (head_error, head_messages),
         }
     }
+
+    implement_modes!('a, (O1, O2), E, M, I);
 
 }

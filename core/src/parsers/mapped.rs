@@ -1,6 +1,7 @@
 // Copyright Rob Gage 2025
 
 use crate::{
+    implement_modes,
     Input,
     Mode,
     ModeResult,
@@ -36,6 +37,8 @@ where
         )
     }
 
+    implement_modes!('a, OB, E, M, I);
+
 }
 
 
@@ -65,6 +68,8 @@ where
             self.function.clone()
         )
     }
+
+    implement_modes!('a, O, EB, M, I);
 
 }
 
@@ -96,5 +101,7 @@ where
             self.function.clone()
         )
     }
+
+    implement_modes!('a, O, E, MB, I);
 
 }

@@ -1,6 +1,7 @@
 // Copyright Rob Gage 2025
 
 use crate::{
+    implement_modes,
     Input,
     Mode,
     ModeResult::{
@@ -96,5 +97,7 @@ where
         }
         Success (outputs, message_container)
     }
+
+    implement_modes!('a, Vec<O1>, E, M, I);
 
 }

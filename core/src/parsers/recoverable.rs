@@ -1,6 +1,7 @@
 // Copyright Rob Gage 2025
 
 use crate::{
+    implement_modes,
     Input,
     Mode,
     ModeResult::{
@@ -38,5 +39,7 @@ where
             success => success
         }
     }
+
+    implement_modes!('a, O, E, M, I);
 
 }

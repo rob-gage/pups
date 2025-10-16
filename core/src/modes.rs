@@ -103,7 +103,7 @@ impl Mode for Check {
     where
         I: Input<'a, >,
         P: Parser<'a, O, E, M, I>,
-    { parser.check(input) }
+    { if parser.check(input) { Success ((), ()) } else { Failure ((), ()) } }
 
     fn convert_output<O>(_: impl Into<O>) -> () { () }
 

@@ -1,6 +1,7 @@
 // Copyright Rob Gage 2025
 
 use crate::{
+    implement_modes,
     Input,
     Mode,
     ModeResult::{
@@ -24,5 +25,7 @@ where
     fn apply<_Mode: Mode>(&self, input: &'a I) -> ModeResult<(), E, M, _Mode> {
         Success (_Mode::convert_output(()), _Mode::new_message_container())
     }
+
+    implement_modes!('a, (), E, M, I);
 
 }

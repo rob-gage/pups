@@ -5,6 +5,7 @@ mod input;
 mod mode_result;
 mod modes;
 mod parsers;
+mod macros;
 
 pub mod prelude {
 

@@ -33,11 +33,9 @@ use optional::Optional;
 use recoverable::Recoverable;
 use sequenced::Sequenced;
 
-
 /// Implementors can be parsed from an input type
 pub trait Parser<'a, O, E, M, I>
 where
-    Self: Sized,
     I: Input<'a>
 {
 
@@ -45,21 +43,15 @@ where
     fn apply<_Mode: Mode>(
         &self,
         input: &'a I
-    ) -> ModeResult<O, E, M, _Mode>;
+    ) -> ModeResult<O, E, M, _Mode>
+    where
+        Self: Sized;
 
-    /// Checks that the input matches this parser, and consumes matched input
-    fn check(
-        &self,
-        input: &'a I,
-    ) -> ModeResult<O, E, M, Check>
-    { self.apply::<Check>(input) }
+    /// Checks input, returning a boolean if it matches this parser
+    fn check(&self, input: &'a I) -> bool;
 
-    /// Checks that the input matches this parser, and consumes matched input
-    fn parse(
-        &self,
-        input: &'a I,
-    ) -> ModeResult<O, E, M, Parse>
-    { self.apply::<Parse>(input) }
+    /// Parses input, returning a fully detailed result
+    fn parse(&self, input: &'a I) -> ModeResult<O, E, M, Parse>;
 
 }
 
@@ -73,11 +65,7 @@ where
         _Mode::apply_parser(self, input)
     }
 
-    fn check(&self, input: &'a I) -> ModeResult<O, E, M, Check> {
-        if (self)(input).is_success() {
-            ModeResult::Success((), ())
-        } else { ModeResult::Failure((), ()) }
-    }
+    fn check(&self, input: &'a I) -> bool { self.parse(input).is_success() }
 
     fn parse(&self, input: &'a I) -> ModeResult<O, E, M, Parse> { self(input) }
 

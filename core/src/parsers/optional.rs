@@ -1,6 +1,7 @@
 // Copyright Rob Gage 2025
 
 use crate::{
+    implement_modes,
     Input,
     Mode,
     ModeResult::{
@@ -27,5 +28,7 @@ where
             Failure (_, messages) => Success (_Mode::convert_output(None), messages)
         }
     }
+
+    implement_modes!('a, Option<O>, E, M, I);
 
 }

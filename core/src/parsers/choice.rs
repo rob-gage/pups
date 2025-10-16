@@ -1,6 +1,7 @@
 // Copyright Rob Gage 2025
 
 use crate::{
+    implement_modes,
     Input,
     Mode,
     ModeResult::{
@@ -45,4 +46,6 @@ impl<'a, O, E1, E2, M, I, P1, P2> Parser<'a, O, (E1, E2), M, I> for Choice<P1, P
         }
     }
 
+    implement_modes!('a, O, (E1, E2), M, I);
+    
 }
