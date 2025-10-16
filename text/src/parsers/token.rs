@@ -2,6 +2,7 @@
 
 use crate::TextInput;
 use pups_core::{
+    implement_modes,
     Input,
     Mode,
     ModeResult::{
@@ -30,5 +31,7 @@ where
             Failure (_Mode::convert_error(()), _Mode::new_message_container())
         }
     }
+
+    implement_modes!('a, &'static str, (), (), I);
 
 }
