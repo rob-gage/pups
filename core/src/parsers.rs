@@ -9,6 +9,8 @@ mod nothing;
 mod optional;
 mod recoverable;
 mod sequenced;
+mod mapped_messages;
+mod mapped_error;
 
 use crate::{
     Check,
@@ -23,11 +25,9 @@ use choice::Choice;
 use end::End;
 use first_match::FirstMatch;
 use iterated::Iterated;
-use mapped::{
-    OutputMapped,
-    ErrorMapped,
-    MessagesMapped,
-};
+use mapped::Mapped;
+use mapped_error::MappedError;
+use mapped_messages::MappedMessages;
 use nothing::Nothing;
 use optional::Optional;
 use recoverable::Recoverable;
@@ -113,7 +113,7 @@ pub const fn mapped<'a, OA, OB, E, M, I>(
 ) -> impl Parser<'a, OB, E, M, I>
 where
     I: Input<'a>,
-{ OutputMapped { parser, function, _phantom: PhantomData } }
+{ Mapped { parser, function, _phantom: PhantomData } }
 
 /// Maps a parser's output to another type using a function
 pub const fn mapped_errors<'a, O, EA, EB, M, I>(
@@ -122,7 +122,7 @@ pub const fn mapped_errors<'a, O, EA, EB, M, I>(
 ) -> impl Parser<'a, O, EB, M, I>
 where
     I: Input<'a>,
-{ ErrorMapped { parser, function, _phantom: PhantomData } }
+{ MappedError { parser, function, _phantom: PhantomData } }
 
 /// Maps a parser's output to another type using a function
 pub const fn mapped_messages<'a, O, E, MA, MB, I>(
@@ -131,7 +131,7 @@ pub const fn mapped_messages<'a, O, E, MA, MB, I>(
 ) -> impl Parser<'a, O, E, MB, I>
 where
     I: Input<'a>,
-{ MessagesMapped { parser, function, _phantom: PhantomData } }
+{ MappedMessages { parser, function, _phantom: PhantomData } }
 
 /// Optionally applies a parser, converting a failure into `Option::None`
 pub const fn optional<'a, O, E, M, I, P>(
@@ -160,11 +160,7 @@ where
     I: Input<'a>,
     P1: Parser<'a, O1, E, M, I>,
     P2: Parser<'a, O2, E, M, I>,
-{ OutputMapped {
-    parser: Sequenced { head: prefix, tail: parser },
-    function: |(_, output)| output,
-    _phantom: PhantomData
-} }
+{ mapped(Sequenced { head: prefix, tail: parser }, |(_, output)| output) }
 
 /// Applies a parser, but uses another one to recover if the first fails, keeping messages from both
 pub const fn recoverable<'a, O, E, M, I, P1, P2>(
@@ -208,10 +204,4 @@ where
     I: Input<'a>,
     P1: Parser<'a, O1, E, M, I>,
     P2: Parser<'a, O2, E, M, I>,
-{
-    OutputMapped {
-        parser: Sequenced { head: parser, tail: terminator },
-        function: |(output, _)| output,
-        _phantom: PhantomData,
-    }
-}
+{ mapped(Sequenced { head: parser, tail: terminator }, |(output, _)| output) }
