@@ -17,7 +17,7 @@ use pups_core::{
 };
 
 /// Parses a unicode identifier
-pub struct UnicodeIdentifier;
+struct UnicodeIdentifier;
 
 impl<'a, C, I> Parser<'a, I::Slice, (), (), I> for UnicodeIdentifier
 where
@@ -54,3 +54,11 @@ where
     implement_modes!('a, I::Slice, (), (), I);
 
 }
+
+/// Parses a unicode identifier
+pub const fn unicode_identifier<'a, C, I>(
+) -> impl Parser<'a, I::Slice, (), (), I>
+where
+    C: Character,
+    I: Input<'a, Item = C> + TextInput,
+{ UnicodeIdentifier }

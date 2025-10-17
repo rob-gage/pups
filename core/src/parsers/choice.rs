@@ -12,9 +12,6 @@ use crate::{
     Parser,
 };
 
-
-/// A combinator that applies a primary parser, and then an alternate, returning the output from
-/// the first of the two to succeed, or the errors from both as a tuple
 pub struct Choice<P1, P2> {
     /// The alternate parser
     pub alternate: P2,
@@ -47,5 +44,5 @@ impl<'a, O, E1, E2, M, I, P1, P2> Parser<'a, O, (E1, E2), M, I> for Choice<P1, P
     }
 
     implement_modes!('a, O, (E1, E2), M, I);
-    
+
 }

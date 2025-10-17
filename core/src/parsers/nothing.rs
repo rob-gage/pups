@@ -12,8 +12,6 @@ use crate::{
 };
 use std::marker::PhantomData;
 
-
-/// Parses absolutely nothing
 struct Nothing<E, M> (PhantomData<(E, M)>);
 
 impl<'a, E, M, I> Parser<'a, (), E, M, I> for Nothing<E, M>

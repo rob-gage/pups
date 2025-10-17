@@ -12,8 +12,6 @@ use crate::{
     Parser,
 };
 
-
-/// Requires that there be no input remaining
 struct End;
 
 impl<'a, I> Parser<'a, (), (), (), I> for End

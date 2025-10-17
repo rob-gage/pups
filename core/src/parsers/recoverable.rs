@@ -11,7 +11,6 @@ use crate::{
     Parser,
 };
 
-/// A parser combinator that applies a parser, and tries a fallback parser if the first fails
 struct Recoverable<P1, P2> {
     /// The fallback parser
     fallback: P2,

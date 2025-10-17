@@ -9,7 +9,6 @@ use crate::{
 };
 use std::marker::PhantomData;
 
-/// A combinator that maps the error type of a parser to another type
 struct MappedError<EA, F, P> {
     /// The parser whose error is mapped
     parser: P,

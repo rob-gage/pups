@@ -48,3 +48,11 @@ where
     implement_modes!('a, I::Slice, (), (), I);
 
 }
+
+/// Parses a number composed of ASCII decimal digits 0-9
+pub const fn number<'a, C, I>(
+) -> impl Parser<'a, I::Slice, (), (), I>
+where
+    C: Character,
+    I: Input<'a, Item = C> + TextInput,
+{ Number }

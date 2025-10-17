@@ -17,7 +17,7 @@ use pups_core::{
 };
 
 /// Parses whitespace
-pub struct Whitespace;
+struct Whitespace;
 
 impl<'a, C, I> Parser<'a, I::Slice, (), (), I> for Whitespace
 where
@@ -49,3 +49,10 @@ where
     implement_modes!('a, I::Slice, (), (), I);
 
 }
+
+/// Parses whitespace
+pub const fn whitespace<'a, C, I>() -> impl Parser<'a, I::Slice, (), (), I>
+where
+    C: Character,
+    I: Input<'a, Item = C> + TextInput,
+{ Whitespace }

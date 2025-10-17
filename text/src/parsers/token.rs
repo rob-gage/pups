@@ -13,8 +13,7 @@ use pups_core::{
     Parser
 };
 
-/// Parses a lexical token
-pub struct Token (pub &'static str);
+struct Token (&'static str);
 
 impl<'a, I> Parser<'a, &'static str, (), (), I> for Token
 where
@@ -35,3 +34,11 @@ where
     implement_modes!('a, &'static str, (), (), I);
 
 }
+
+/// Parses a lexical token
+pub const fn token<'a, I>(
+    lexeme: &'static str
+) -> impl Parser<'a, &'static str, (), (), I>
+where
+    I: Input<'a> + TextInput,
+{ Token (lexeme) }

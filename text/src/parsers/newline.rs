@@ -16,8 +16,7 @@ use pups_core::{
     Parser
 };
 
-/// Parses a lexical token
-pub struct Newline;
+struct Newline;
 
 impl<'a, C, I> Parser<'a, (), (), (), I> for Newline
 where
@@ -41,3 +40,10 @@ where
     implement_modes!('a, (), (), (), I);
 
 }
+
+/// Parses a single newline character
+pub const fn newline<'a, C, I>() -> impl Parser<'a, (), (), (), I>
+where
+    C: Character,
+    I: Input<'a, Item = C> + TextInput,
+{ Newline }

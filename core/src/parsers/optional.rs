@@ -12,7 +12,6 @@ use crate::{
     Parser,
 };
 
-/// A combinator that applies a parser optionally
 struct Optional<P> (P);
 
 impl<'a, O, E, M, I, P> Parser<'a, Option<O>, E, M, I> for Optional<P>

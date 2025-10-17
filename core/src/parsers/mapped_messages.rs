@@ -9,7 +9,6 @@ use crate::{
 };
 use std::marker::PhantomData;
 
-/// A combinator that maps the message type of a parser to another type
 struct MappedMessages<MA, F, P> {
     /// The parser whose messages are mapped
     parser: P,
