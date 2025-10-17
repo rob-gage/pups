@@ -4,6 +4,7 @@ use crate::{
     implement_modes,
     Input,
     Mode,
+    mapped,
     ModeResult::{
         self,
         Success,
@@ -13,11 +14,11 @@ use crate::{
 };
 
 /// A combinator that applies one parser, then another, and then returns their outputs as a tuple
-pub struct Sequenced<P1, P2> {
+struct Sequenced<P1, P2> {
     /// The head of the `Sequence`
-    pub head: P1,
+    head: P1,
     /// The tail of the `Sequence`
-    pub tail: P2,
+    tail: P2,
 }
 
 impl<'a, O1, O2, E, M, I, P1, P2> Parser<'a, (O1, O2), E, M, I> for Sequenced<P1, P2>
@@ -58,3 +59,50 @@ where
     implement_modes!('a, (O1, O2), E, M, I);
 
 }
+
+/// Applies a parser preceded by an ignored prefix parser, and followed by an ignored terminator
+/// parser
+pub fn delimited<'a, O1, O2, O3, E, M, I, P1, P2, P3>(
+    prefix: P1,
+    parser: P2,
+    terminator: P3,
+) -> impl Parser<'a, O2, E, M, I>
+where
+    I: Input<'a>,
+    P1: Parser<'a, O1, E, M, I>,
+    P2: Parser<'a, O2, E, M, I>,
+    P3: Parser<'a, O3, E, M, I>,
+{ preceded(prefix, terminated(parser, terminator)) }
+
+/// Applies a parser after an ignored prefix parser
+pub const fn preceded<'a, O1, O2, E,  M, I, P1, P2>(
+    prefix: P1,
+    parser: P2
+) -> impl Parser<'a, O2, E, M, I>
+where
+    I: Input<'a>,
+    P1: Parser<'a, O1, E, M, I>,
+    P2: Parser<'a, O2, E, M, I>,
+{ mapped(sequenced(prefix, parser), |(_, output)| output) }
+
+/// Applies a parser followed by another parser, and returns the outputs as a tuple
+pub const fn sequenced<'a, O1, O2, E, M, I, P1, P2>(
+    first: P1,
+    second: P2
+) -> impl Parser<'a, (O1, O2), E, M, I>
+where
+    I: Input<'a>,
+    P1: Parser<'a, O1, E, M, I>,
+    P2: Parser<'a, O2, E, M, I>,
+{ Sequenced { head: first, tail: second } }
+
+/// Applies a parser followed by an ignored terminator parser
+pub const fn terminated<'a, O1, O2, E, M, I, P1, P2>(
+    parser: P1,
+    terminator: P2
+) -> impl Parser<'a, O1, E, M, I>
+where
+    I: Input<'a>,
+    P1: Parser<'a, O1, E, M, I>,
+    P2: Parser<'a, O2, E, M, I>,
+{ mapped(sequenced(parser, terminator), |(output, _)| output) }

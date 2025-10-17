@@ -14,7 +14,7 @@ use crate::{
 
 
 /// Requires that there be no input remaining
-pub struct End;
+struct End;
 
 impl<'a, I> Parser<'a, (), (), (), I> for End
 where
@@ -34,3 +34,9 @@ where
     implement_modes!('a, (), (), (), I);
 
 }
+
+/// Matches the end of the provided input
+pub const fn end<'a, I>() -> impl Parser<'a, (), (), (), I>
+where
+    I: Input<'a>,
+{ End }

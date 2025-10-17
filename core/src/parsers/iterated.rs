@@ -2,6 +2,7 @@
 
 use crate::{
     implement_modes,
+    nothing,
     Input,
     Mode,
     ModeResult::{
@@ -14,16 +15,16 @@ use crate::{
 use std::marker::PhantomData;
 
 /// A combinator that applies a parser in multiple iterations
-pub struct Iterated<O2, P1, P2> {
+struct Iterated<O2, P1, P2> {
     /// The maximum number of parser iterations that this combinator applies
-    pub maximum: Option<usize>,
+    maximum: Option<usize>,
     /// The minimum number of parser iterations that this combinator applies
-    pub minimum: usize,
+    minimum: usize,
     /// The parser that is applied in multiple iterations
-    pub parser: P1,
+    parser: P1,
     /// The parser that is applied in between iterations
-    pub separator: P2,
-    pub _phantom: PhantomData<O2>,
+    separator: P2,
+    _phantom: PhantomData<O2>,
 }
 
 impl<O2, P1, P2> Iterated<O2, P1, P2> {
@@ -101,3 +102,23 @@ where
     implement_modes!('a, Vec<O1>, E, M, I);
 
 }
+
+/// Iterates application of a parser
+pub const fn many<'a, O, E, M, I, P>(
+    parser: P,
+) -> impl Parser<'a, Vec<O>, E, M, I>
+where
+    I: Input<'a>,
+    P: Parser<'a, O, E, M, I>,
+{ separated(parser, nothing()) }
+
+/// Iterates application of a parser separated by application of another parser
+pub const fn separated<'a, E, I, M, O1, O2, P1, P2>(
+    parser: P1,
+    separator: P2
+) -> impl Parser<'a, Vec<O1>, E, M, I>
+where
+    I: Input<'a>,
+    P1: Parser<'a, O1, E, M, I>,
+    P2: Parser<'a, O2, E, M, I>,
+{ Iterated { maximum: None, minimum: 0, parser, separator, _phantom: PhantomData } }

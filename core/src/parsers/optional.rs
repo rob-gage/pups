@@ -12,9 +12,8 @@ use crate::{
     Parser,
 };
 
-
 /// A combinator that applies a parser optionally
-pub struct Optional<P> (pub P);
+struct Optional<P> (P);
 
 impl<'a, O, E, M, I, P> Parser<'a, Option<O>, E, M, I> for Optional<P>
 where
@@ -32,3 +31,12 @@ where
     implement_modes!('a, Option<O>, E, M, I);
 
 }
+
+/// Optionally applies a parser, converting a failure into `Option::None`
+pub const fn optional<'a, O, E, M, I, P>(
+    parser: P,
+) -> impl Parser<'a, Option<O>, E, M, I>
+where
+    I: Input<'a>,
+    P: Parser<'a, O, E, M, I>,
+{ Optional (parser) }

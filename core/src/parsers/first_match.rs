@@ -12,10 +12,7 @@ use crate::{
     Parser,
 };
 
-
-/// A parser that consumes input until finding the first successful match of a child parser, if it
-/// exists
-pub struct FirstMatch<P> (pub P);
+struct FirstMatch<P> (P);
 
 impl<'a, O, E, M, I, P> Parser<'a, Option<O>, E, M, I> for FirstMatch<P>
 where
@@ -36,3 +33,12 @@ where
     implement_modes!('a, Option<O>, E, M, I);
 
 }
+
+/// Consumes input until a parser can be applied successfully or there is no input left
+pub const fn seek<'a, O, E, M, I, P>(
+    parser: P,
+) -> impl Parser<'a, Option<O>, E, M, I>
+where
+    I: Input<'a>,
+    P: Parser<'a, O, E, M, I>,
+{ FirstMatch (parser) }

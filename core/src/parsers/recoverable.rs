@@ -7,17 +7,16 @@ use crate::{
     ModeResult::{
         self,
         Failure,
-        Success,
     },
     Parser,
 };
 
 /// A parser combinator that applies a parser, and tries a fallback parser if the first fails
-pub struct Recoverable<P1, P2> {
+struct Recoverable<P1, P2> {
     /// The fallback parser
-    pub fallback: P2,
+    fallback: P2,
     /// The parser that is applied first
-    pub parser: P1,
+    parser: P1,
 }
 
 impl<'a, O, E, M, I, P1, P2> Parser<'a, O, E, M, I> for Recoverable<P1, P2>
@@ -43,3 +42,14 @@ where
     implement_modes!('a, O, E, M, I);
 
 }
+
+/// Applies a parser, but uses another one to recover if the first fails, keeping messages from both
+pub const fn recoverable<'a, O, E, M, I, P1, P2>(
+    parser: P1,
+    fallback: P2
+) -> impl Parser<'a, O, E, M, I>
+where
+    I: Input<'a>,
+    P1: Parser<'a, O, E, M, I>,
+    P2: Parser<'a, O, E, M, I>,
+{ Recoverable { fallback, parser } }

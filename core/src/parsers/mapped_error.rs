@@ -10,14 +10,13 @@ use crate::{
 use std::marker::PhantomData;
 
 /// A combinator that maps the error type of a parser to another type
-pub struct MappedError<EA, F, P> {
+struct MappedError<EA, F, P> {
     /// The parser whose error is mapped
-    pub parser: P,
+    parser: P,
     /// The function used to map the error of the parser
-    pub function: F,
-    pub _phantom: PhantomData<EA>
+    function: F,
+    _phantom: PhantomData<EA>
 }
-
 
 impl<'a, O, EA, EB, M, F, I, P> Parser<'a, O, EB, M, I> for MappedError<EA, F, P>
 where
@@ -38,3 +37,12 @@ where
     implement_modes!('a, O, EB, M, I);
 
 }
+
+/// Maps a parser's output to another type using a function
+pub const fn mapped_error<'a, O, EA, EB, M, I>(
+    parser: impl Parser<'a, O, EA, M, I>,
+    function: impl Fn(EA) -> EB + Clone
+) -> impl Parser<'a, O, EB, M, I>
+where
+    I: Input<'a>,
+{ MappedError { parser, function, _phantom: PhantomData } }

@@ -9,16 +9,13 @@ use crate::{
 };
 use std::marker::PhantomData;
 
-
-/// A combinator that maps the output type of a parser to another type
-pub struct Mapped<OA, F, P> {
+struct Mapped<OA, F, P> {
     /// The parser whose output is mapped
-    pub parser: P,
+    parser: P,
     /// The function used to map the output of the parser
-    pub function: F,
-    pub _phantom: PhantomData<OA>,
+    function: F,
+    _phantom: PhantomData<OA>,
 }
-
 
 impl<'a, OA, OB, E, M, F, I, P> Parser<'a, OB, E, M, I> for Mapped<OA, F, P>
 where
@@ -40,3 +37,12 @@ where
     implement_modes!('a, OB, E, M, I);
 
 }
+
+/// Maps a parser's output to another type using a function
+pub const fn mapped<'a, OA, OB, E, M, I>(
+    parser: impl Parser<'a, OA, E, M, I>,
+    function: impl Fn(OA) -> OB + Clone
+) -> impl Parser<'a, OB, E, M, I>
+where
+    I: Input<'a>,
+{ Mapped { parser, function, _phantom: PhantomData } }
