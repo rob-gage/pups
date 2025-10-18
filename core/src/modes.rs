@@ -28,12 +28,12 @@ where
 
     /// Applies a parser using this `Mode`
     fn apply_parser<'a, O, E, M, I, P>(
-        parser: P,
+        parser: &P,
         input: &'a I,
     ) -> ModeResult<O, E, M, Self>
     where
         I: Input<'a>,
-        P: Parser<'a, O, E, M, I>;
+        P: Parser<'a, O, E, M, I> + ?Sized;
 
     /// Converts an output to its representational form in this mode
     fn convert_output<O>(output: impl Into<O>) -> Self::OutputForm<O>;
@@ -99,10 +99,10 @@ impl Mode for Check {
 
     type MessageContainer<M> = ();
 
-    fn apply_parser<'a, O, E, M, I, P>(parser: P, input: &'a I) -> ModeResult<O, E, M, Self>
+    fn apply_parser<'a, O, E, M, I, P>(parser: &P, input: &'a I) -> ModeResult<O, E, M, Self>
     where
         I: Input<'a, >,
-        P: Parser<'a, O, E, M, I>,
+        P: Parser<'a, O, E, M, I> + ?Sized,
     { if parser.check(input) { Success ((), ()) } else { Failure ((), ()) } }
 
     fn convert_output<O>(_: impl Into<O>) -> () { () }
@@ -165,10 +165,10 @@ impl Mode for Parse {
 
     type MessageContainer<M> = Vec<M>;
 
-    fn apply_parser<'a, O, E, M, I, P>(parser: P, input: &'a I) -> ModeResult<O, E, M, Self>
+    fn apply_parser<'a, O, E, M, I, P>(parser: &P, input: &'a I) -> ModeResult<O, E, M, Self>
     where
         I: Input<'a>,
-        P: Parser<'a, O, E, M, I>,
+        P: Parser<'a, O, E, M, I> + ?Sized,
     { parser.parse(input) }
 
     fn convert_output<O>(output: impl Into<O>) -> O { output.into() }

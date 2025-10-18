@@ -11,6 +11,7 @@ mod recoverable;
 mod sequenced;
 mod mapped_messages;
 mod mapped_error;
+mod boxed;
 
 use crate::{
     Check,
@@ -21,6 +22,7 @@ use crate::{
 };
 use std::marker::PhantomData;
 
+pub use boxed::boxed;
 // pub use choice::Choice;
 pub use end::end;
 pub use first_match::seek;
