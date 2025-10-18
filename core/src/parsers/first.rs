@@ -12,9 +12,9 @@ use crate::{
     Parser,
 };
 
-struct FirstMatch<P> (P);
+struct First<P> (P);
 
-impl<'a, O, E, M, I, P> Parser<'a, Option<O>, E, M, I> for FirstMatch<P>
+impl<'a, O, E, M, I, P> Parser<'a, Option<O>, E, M, I> for First<P>
 where
     I: Input<'a>,
     P: Parser<'a, O, E, M, I>,
@@ -35,10 +35,10 @@ where
 }
 
 /// Consumes input until a parser can be applied successfully or there is no input left
-pub const fn seek<'a, O, E, M, I, P>(
+pub const fn first<'a, O, E, M, I, P>(
     parser: P,
 ) -> impl Parser<'a, Option<O>, E, M, I>
 where
     I: Input<'a>,
     P: Parser<'a, O, E, M, I>,
-{ FirstMatch (parser) }
+{ First(parser) }

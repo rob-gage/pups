@@ -2,7 +2,7 @@
 
 mod choice;
 mod end;
-mod first_match;
+mod first;
 mod iterated;
 mod mapped;
 mod nothing;
@@ -25,7 +25,7 @@ use std::marker::PhantomData;
 pub use boxed::boxed;
 // pub use choice::Choice;
 pub use end::end;
-pub use first_match::seek;
+pub use first::first;
 pub use iterated::{
     many,
     separated,
