@@ -11,9 +11,13 @@ use crate::{
 /// Methods implemented for all parsers that allow easy construction of parser combinators
 pub trait Combinators<'a, O, E, M, I>
 where
-    Self: Parser<'a, O, E, M, I> + Sized,
+    Self: Parser<'a, O, E, M, I> + Sized + 'a,
     I: Input<'a>
 {
+
+    /// Boxes a parser, performing type erasure so it can be used in combinators like `choice`
+    fn boxed(self) -> impl Parser<'a, O, E, M, I>
+    { boxed(self) }
 
     /// If necessary, runs a fallback parser to recover from the failure of the original parser
     /// while preserving all messages from the original parser
@@ -61,5 +65,5 @@ where
 impl<'a, O, E, M, I, P> Combinators<'a, O, E, M, I> for P
 where
     I: Input<'a>,
-    P: Parser<'a, O, E, M, I> + Sized,
+    P: Parser<'a, O, E, M, I> + Sized + 'a,
 { }

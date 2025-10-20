@@ -12,9 +12,9 @@ use crate::{
     Parser,
 };
 
-struct Boxed<'a, 'b, O, E, M, I> (Box<dyn Parser<'a, O, E, M, I> + 'b>);
+struct Boxed<'a, O, E, M, I> (Box<dyn Parser<'a, O, E, M, I> + 'a>);
 
-impl<'a, 'b, O, E, M, I> Parser<'a, O, E, M, I> for Boxed<'a, 'b, O, E, M, I>
+impl<'a, O, E, M, I> Parser<'a, O, E, M, I> for Boxed<'a, O, E, M, I>
 where
     I: Input<'a>,
 {
@@ -28,10 +28,10 @@ where
 }
 
 /// Optionally applies a parser, converting a failure into `Option::None`
-pub fn boxed<'a, 'b, O, E, M, I, P>(
+pub fn boxed<'a, O, E, M, I, P>(
     parser: P,
 ) -> impl Parser<'a, O, E, M, I>
 where
     I: Input<'a>,
-    P: Parser<'a, O, E, M, I> + Sized + 'b,
-{ Boxed::<'a, 'b, O, E, M, I> (Box::new(parser)) }
+    P: Parser<'a, O, E, M, I> + Sized + 'a,
+{ Boxed::<'a, O, E, M, I> (Box::new(parser)) }
