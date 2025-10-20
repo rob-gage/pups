@@ -33,6 +33,27 @@ where
     fn or_not(self) -> impl Parser<'a, Option<O>, E, M, I>
     { optional(self) }
 
+    /// Maps a parser's output to another type using a function
+    fn map<_O>(
+        self,
+        f: impl Fn(O) -> _O + Clone
+    ) -> impl Parser<'a, _O, E, M, I>
+    { mapped(self, f) }
+
+    /// Maps a parser's error to another type using a function
+    fn map_error<_E>(
+        self,
+        f: impl Fn(E) -> _E + Clone
+    ) -> impl Parser<'a, O, _E, M, I>
+    { mapped_error(self, f) }
+
+    /// Maps a parser's messages to another type using a function
+    fn map_messages<_M>(
+        self,
+        f: impl Fn(M) -> _M + Clone
+    ) -> impl Parser<'a, O, E, _M, I>
+    { mapped_messages(self, f) }
+
     /// Applies another parser in sequence after this one, and returns both results as a tuple
     fn then<P, _O>(
         self,
