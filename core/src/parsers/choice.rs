@@ -12,37 +12,42 @@ use crate::{
     Parser,
 };
 
-pub struct Choice<P1, P2> {
-    /// The alternate parser
-    pub alternate: P2,
-    /// The primary parser
-    pub primary: P1,
-}
+pub struct Choice<PL> (PL);
 
-impl<'a, O, E1, E2, M, I, P1, P2> Parser<'a, O, (E1, E2), M, I> for Choice<P1, P2> where
+impl<'a, O, E, M, I, P, const COUNT: usize> Parser<'a, O, E, M, I> for Choice<[P; COUNT]> where
     I: Input<'a>,
-    P1: Parser<'a, O, E1, M, I>,
-    P2: Parser<'a, O, E2, M, I>,
+    P: Parser<'a, O, E, M, I>,
 {
 
-    fn apply<_Mode: Mode>(&self, input: &'a I) -> ModeResult<O, (E1, E2), M, _Mode> {
-        match self.primary.apply::<_Mode>(input) {
-            Success (output, messages) => Success (output, messages),
-            Failure (primary_error, _) =>
-                match self.alternate.apply::<_Mode>(input) {
-                    Success (output, alternate_messages) => Success (output, alternate_messages),
-                    Failure (alternate_error, alternate_messages) => Failure (
-                        _Mode::merge_errors(
-                            primary_error,
-                            alternate_error,
-                            |p, a| (p, a)
-                        ),
-                        alternate_messages
-                    )
+    fn apply<_Mode: Mode>(&self, input: &'a I) -> ModeResult<O, E, M, _Mode> {
+        let start = input.save_cursor();
+        let mut last_error: Option<_Mode::ErrorForm<E>> = None;
+        let mut last_messages: Option<_Mode::MessageContainer<M>> = None;
+        for parser in &self.0 {
+            match parser.apply::<_Mode>(input) {
+                Success(output, messages) => return Success(output, messages),
+                Failure(error, messages) => {
+                    input.restore_cursor(start);
+                    last_error = Some(error);
+                    last_messages = Some(messages);
                 }
+            }
         }
+        Failure(
+            last_error.expect("`choice` must not be used with no parsers"),
+            last_messages.expect("`choice` must not be used with no parsers"),
+        )
     }
 
-    implement_modes!('a, O, (E1, E2), M, I);
+    implement_modes!('a, O, E, M, I);
 
 }
+
+/// Optionally applies a parser, converting a failure into `Option::None`
+pub const fn choice<'a, O, E, M, I, PL>(
+    parser_list: PL,
+) -> impl Parser<'a, O, E, M, I>
+where
+    I: Input<'a>,
+    Choice<PL>: Parser<'a, O, E, M, I>,
+{ Choice (parser_list) }
