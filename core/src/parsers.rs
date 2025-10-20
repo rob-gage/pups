@@ -23,7 +23,7 @@ use crate::{
 use std::marker::PhantomData;
 
 pub use boxed::boxed;
-// pub use choice::Choice;
+pub use choice::choice;
 pub use end::end;
 pub use first::first;
 pub use iterated::{
