@@ -20,14 +20,12 @@ impl<'a, O, E, M, I, P, const COUNT: usize> Parser<'a, O, E, M, I> for Choice<[P
 {
 
     fn apply<_Mode: Mode>(&self, input: &'a I) -> ModeResult<O, E, M, _Mode> {
-        let start = input.save_cursor();
         let mut last_error: Option<_Mode::ErrorForm<E>> = None;
         let mut last_messages: Option<_Mode::MessageContainer<M>> = None;
         for parser in &self.0 {
             match parser.apply::<_Mode>(input) {
                 Success(output, messages) => return Success(output, messages),
                 Failure(error, messages) => {
-                    input.restore_cursor(start);
                     last_error = Some(error);
                     last_messages = Some(messages);
                 }
@@ -37,6 +35,23 @@ impl<'a, O, E, M, I, P, const COUNT: usize> Parser<'a, O, E, M, I> for Choice<[P
             last_error.expect("`choice` must not be used with no parsers"),
             last_messages.expect("`choice` must not be used with no parsers"),
         )
+    }
+
+    implement_modes!('a, O, E, M, I);
+
+}
+
+impl<'a, O, E, M, I, P1, P2> Parser<'a, O, E, M, I> for Choice<(P1, P2)> where
+    I: Input<'a>,
+    P1: Parser<'a, O, E, M, I>,
+    P2: Parser<'a, O, E, M, I>,
+{
+
+    fn apply<_Mode: Mode>(&self, input: &'a I) -> ModeResult<O, E, M, _Mode> {
+        match self.0.0.apply::<_Mode>(input) {
+            Failure (_, _) => self.0.1.apply::<_Mode>(input),
+            success => success,
+        }
     }
 
     implement_modes!('a, O, E, M, I);
