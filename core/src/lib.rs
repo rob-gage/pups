@@ -10,6 +10,7 @@ mod macros;
 pub mod prelude {
 
     pub use crate::{
+        combinators::Combinators,
         mode_result::ModeResult,
         modes::{
             Check,
