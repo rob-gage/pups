@@ -12,6 +12,7 @@ mod sequenced;
 mod mapped_messages;
 mod mapped_error;
 mod boxed;
+mod emitting;
 
 use crate::{
     Check,
@@ -24,6 +25,7 @@ use std::marker::PhantomData;
 
 pub use boxed::boxed;
 pub use choice::choice;
+pub use emitting::emitting;
 pub use end::end;
 pub use first::first;
 pub use iterated::{

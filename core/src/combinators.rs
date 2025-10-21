@@ -29,6 +29,15 @@ where
         P: Parser<'a, O, E, M, I>
     { recoverable(self, fallback) }
 
+    /// Replaces a parser's output
+    fn emit<_O>(
+        self,
+        output: _O
+    ) -> impl Parser<'a, _O, E, M, I>
+    where
+        _O: Clone,
+    { emitting(self, output) }
+
     /// Applies a parser optionally, returning `None` instead of an error if it fails
     fn or_not(self) -> impl Parser<'a, Option<O>, E, M, I>
     { optional(self) }
