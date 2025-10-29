@@ -18,7 +18,7 @@ pub struct Text<'a> {
 impl<'a> Text<'a> {
 
     /// Creates a new `Text` from a `&str`
-    fn from_string(string: &'a str) -> Self {
+    pub fn from_string(string: &'a str) -> Self {
         Self { buffer: string, byte_offset: 0 }
     }
 
