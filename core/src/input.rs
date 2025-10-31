@@ -12,23 +12,16 @@ pub trait Input<'a> {
     /// Advances the cursor by one position increment
     fn advance(&self);
 
-    /// Gets a slice from the `Input` with a given length if it does not exceed the `Input` bounds
-    fn consume(&'a self, length: usize) -> Option<Self::Slice>;
-
-    /// Returns the next `Self::Item` in `Self` if it exists and advances the cursor
-    fn next(&'a self) -> Option<Self::Item> {
-        let item: Self::Item = self.peek()?;
-        self.advance();
-        Some (item)
-    }
-
     /// Returns the next `Self::Item` in `Self` if it exists
     fn peek(&'a self) -> Option<Self::Item>;
 
+    /// Gets a slice from a given start cursor to a given end cursor, panicking on bounds errors
+    fn slice(&'a self, start: usize, end: usize) -> Self::Slice;
+
     /// Restores the cursor of this `Input` to a given position
-    fn restore_cursor(&self, position: usize);
+    fn move_cursor(&self, position: usize);
 
     /// Saves the position of the cursor of this `Input`
-    fn save_cursor(&self) -> usize;
+    fn store_cursor(&self) -> usize;
 
 }

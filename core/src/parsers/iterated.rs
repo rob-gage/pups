@@ -54,13 +54,13 @@ where
         &self,
         input: &'a I
     ) -> ModeResult<Vec<O1>, E, M, _Mode> {
-        let start_cursor: usize = input.save_cursor();
+        let start_cursor: usize = input.store_cursor();
         let maximum: usize = if let Some (maximum) = self.maximum { maximum } else { usize::MAX };
         let mut outputs: _Mode::OutputForm<Vec<O1>> = _Mode::convert_output(Vec::new());
         let mut output_count: usize = 0;
         let mut message_container: _Mode::MessageContainer<M> = _Mode::new_message_container();
         loop {
-            let cursor_before_separator: usize = input.save_cursor();
+            let cursor_before_separator: usize = input.store_cursor();
             let expects_item: bool = output_count < self.minimum;
             // parse separator (if necessary)
             if output_count > 0 {
@@ -71,9 +71,12 @@ where
                         message_container
                             = _Mode::merge_message_containers(message_container, messages);
                         return if expects_item {
-                            input.restore_cursor(start_cursor);
+                            input.move_cursor(start_cursor);
                             Failure (error, message_container)
-                        } else { Success (outputs, message_container) }
+                        } else {
+                            input.move_cursor(cursor_before_separator);
+                            Success (outputs, message_container)
+                        }
                     },
                 }
             }
@@ -92,10 +95,10 @@ where
                     message_container
                         = _Mode::merge_message_containers(message_container, messages);
                     return if expects_item {
-                        input.restore_cursor(start_cursor);
+                        input.move_cursor(start_cursor);
                         Failure (error, message_container)
                     } else {
-                        input.restore_cursor(cursor_before_separator);
+                        input.move_cursor(cursor_before_separator);
                         Success (outputs, message_container)
                     }
                 }
