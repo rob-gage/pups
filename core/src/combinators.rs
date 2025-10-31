@@ -7,6 +7,7 @@ use crate::{
     ModeResult,
     Parse
 };
+use std::fmt::Debug;
 
 /// Methods implemented for all parsers that allow easy construction of parser combinators
 pub trait Combinators<'a, O, E, M, I>
@@ -89,6 +90,13 @@ where
     where
         P: Parser<'a, _O, E, M, I>
     { preceded(self, next) }
+
+    /// Applies a parser optionally, returning `None` instead of an error if it fails
+    fn trace(self, name: &'static str) -> impl Parser<'a, O, E, M, I>
+    where
+        O: Debug,
+        E: Debug,
+    { traced(self, name) }
 
 }
 

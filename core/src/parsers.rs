@@ -1,7 +1,9 @@
 // Copyright Rob Gage 2025
 
+mod boxed;
 mod choice;
 mod end;
+mod emitting;
 mod first;
 mod iterated;
 mod mapped;
@@ -11,8 +13,7 @@ mod recoverable;
 mod sequenced;
 mod mapped_messages;
 mod mapped_error;
-mod boxed;
-mod emitting;
+mod traced;
 
 use crate::{
     Check,
@@ -44,6 +45,7 @@ pub use sequenced::{
     sequenced,
     terminated,
 };
+pub use traced::traced;
 
 /// Implementors can be parsed from an input type
 pub trait Parser<'a, O, E, M, I>
