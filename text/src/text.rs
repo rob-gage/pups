@@ -81,6 +81,11 @@ impl<'a> TextInput for Text<'a> {
     fn starts_with(&self, string: &str) -> bool
     { self.buffer[self.byte_offset..].starts_with(string) }
 
-    fn skip_bytes(&mut self, byte_count: usize) { self.restore_cursor(self.byte_offset + byte_count) }
+    fn skip_bytes(&self, byte_count: usize) {
+        unsafe {
+            let mutable: *mut Self = self as *const Self as *mut Self;
+            (*mutable).byte_offset += byte_count;
+        }
+    }
 
 }

@@ -7,6 +7,6 @@ pub trait TextInput {
     fn starts_with(&self, string: &str) -> bool;
 
     /// Skips past a given number of bytes in the `TextInput`
-    fn skip_bytes(&mut self, count: usize);
+    fn skip_bytes(&self, count: usize);
 
 }

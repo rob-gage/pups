@@ -25,6 +25,7 @@ where
         input: &'a I
     ) -> ModeResult<&'static str, (), (), _Mode> {
         if input.starts_with(self.0) {
+            input.skip_bytes(self.0.len());
             Success (_Mode::convert_output(self.0), _Mode::new_message_container())
         } else {
             Failure (_Mode::convert_error(()), _Mode::new_message_container())

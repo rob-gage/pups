@@ -37,13 +37,11 @@ where
         }
         let length: usize = input.save_cursor() - start;
         if length > 0 {
-            input.restore_cursor(start);
             Success (
                 _Mode::convert_output(input.consume(length).unwrap()),
                 _Mode::new_message_container()
             )
-        }
-        else { Failure (_Mode::convert_error(()), _Mode::new_message_container())}
+        } else { Failure (_Mode::convert_error(()), _Mode::new_message_container()) }
     }
 
     implement_modes!('a, I::Slice, (), (), I);
