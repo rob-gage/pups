@@ -59,44 +59,48 @@ where
         let mut outputs: _Mode::OutputForm<Vec<O1>> = _Mode::convert_output(Vec::new());
         let mut output_count: usize = 0;
         let mut message_container: _Mode::MessageContainer<M> = _Mode::new_message_container();
-        while output_count < maximum {
-            // parse separator
-            match self.separator.apply::<_Mode>(input) {
-                Success (_, messages) => {
-                    message_container =
-                        _Mode::merge_message_containers(message_container, messages);
-                    // parse output
-                    let cursor: usize = input.save_cursor();
-                    match self.parser.apply::<_Mode>(input) {
-                        Success (output, messages) => {
-                            debug_assert!(input.save_cursor() > cursor);
-                            message_container =
-                                _Mode::merge_message_containers(message_container, messages);
-                            outputs = _Mode::merge_outputs(outputs, output, |mut outputs, output| {
-                                outputs.push(output); outputs
-                            });
-                            output_count += 1;
-                        }
-                        Failure (error, messages) => if output_count < self.minimum {
+        loop {
+            let cursor_before_separator: usize = input.save_cursor();
+            let expects_item: bool = output_count < self.minimum;
+            // parse separator (if necessary)
+            if output_count > 0 {
+                match self.separator.apply::<_Mode>(input) {
+                    Success (_, messages) => message_container
+                        = _Mode::merge_message_containers(message_container, messages),
+                    Failure (error, messages) => {
+                        message_container
+                            = _Mode::merge_message_containers(message_container, messages);
+                        return if expects_item {
                             input.restore_cursor(start_cursor);
-                            return Failure (
-                                error,
-                                _Mode::merge_message_containers(message_container, messages)
-                            )
-                        } else { break }
+                            Failure (error, message_container)
+                        } else { Success (outputs, message_container) }
+                    },
+                }
+            }
+            // parse item
+            match self.parser.apply::<_Mode>(input) {
+                Success (output, messages) => {
+                    message_container
+                        = _Mode::merge_message_containers(message_container, messages);
+                    outputs = _Mode::merge_outputs(outputs, output,|mut outputs, output| {
+                        outputs.push(output); outputs
+                    });
+                    output_count += 1;
+                    if output_count == maximum { return Success (outputs, message_container) }
+                }
+                Failure (error, messages) => {
+                    message_container
+                        = _Mode::merge_message_containers(message_container, messages);
+                    return if expects_item {
+                        input.restore_cursor(start_cursor);
+                        Failure (error, message_container)
+                    } else {
+                        input.restore_cursor(cursor_before_separator);
+                        Success (outputs, message_container)
                     }
                 }
-                Failure (error, messages) => if output_count < self.minimum {
-                    // fail if more iterations were required
-                    input.restore_cursor(start_cursor);
-                    return Failure (
-                        error,
-                        _Mode::merge_message_containers(message_container, messages)
-                    )
-                } else { break }
             }
         }
-        Success (outputs, message_container)
     }
 
     implement_modes!('a, Vec<O1>, E, M, I);
