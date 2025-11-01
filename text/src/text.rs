@@ -39,40 +39,18 @@ impl<'a> Input<'a> for Text<'a> {
         }
     }
 
-    fn consume(&'a self, length: usize) -> Option<&'a str> {
-        let start: usize = self.save_cursor();
-        let mut slice_byte_count: usize = 0;
-        for _ in 0..length {
-            if let Some(character) = self.next() {
-                slice_byte_count += character.length();
-            } else { return None; }
-        }
-        let slice: &'a str = &self.buffer[start..start + slice_byte_count];
-        Some (slice)
-    }
+    fn slice(&'a self, start: usize, end: usize) -> &'a str { &self.buffer[start..end] }
 
-    fn next(&self) -> Option<Self::Item> {
-        if let Some (character) = self.peek() {
-            unsafe {
-                let mutable: *mut Self = self as *const Self as *mut Self;
-                (*mutable).byte_offset += character.length();
-            }
-            Some (character)
-        } else { None }
-    }
+    fn peek(&self) -> Option<Self::Item> { self.buffer[self.byte_offset..].chars().next() }
 
-    fn peek(&self) -> Option<Self::Item> {
-        char::next_in(&self.buffer[self.byte_offset..])
-    }
-
-    fn restore_cursor(&self, cursor: usize) {
+    fn move_cursor(&self, cursor: usize) {
         unsafe {
             let mutable: *mut Self = self as *const Self as *mut Self;
             (*mutable).byte_offset = cursor;
         }
     }
 
-    fn save_cursor(&self) -> usize { self.byte_offset }
+    fn store_cursor(&self) -> usize { self.byte_offset }
 
 }
 

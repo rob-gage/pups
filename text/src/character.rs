@@ -10,9 +10,6 @@ pub trait Character where
     Self: Sized
 {
 
-    /// Returns the next `Character` from a given string slice
-    fn next_in(string: &str) -> Option<Self>;
-
     /// Returns `true` if this `Character` is an ASCII decimal digit
     fn is_ascii_decimal(&self) -> bool;
 
@@ -39,20 +36,10 @@ pub trait Character where
 
 impl Character for char {
 
-    fn next_in(string: &str) -> Option<Self> { string.chars().next() }
-
     fn is_ascii_decimal(&self) -> bool { self.is_ascii_digit() }
 
     fn is_newline(&self) -> bool {
-        matches!(self,
-            '\u{000A}' | // line feed (LF)
-            '\u{000B}' | // vertical tab (VT)
-            '\u{000C}' | // form feed (FF)
-            '\u{000D}' | // carriage return (CR)
-            '\u{0085}' | // next line (NEL)
-            '\u{2028}' | // line separator
-            '\u{2029}'   // paragraph separator
-        )
+        char::is_whitespace(*self)
     }
 
     fn is_whitespace(&self) -> bool { char::is_whitespace(*self) }

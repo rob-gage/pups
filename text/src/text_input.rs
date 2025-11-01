@@ -1,5 +1,7 @@
 // Copyright Rob Gage 2025
 
+use pups_core::Input;
+
 /// Represents text-based input that can be consumed by parsers
 pub trait TextInput {
 

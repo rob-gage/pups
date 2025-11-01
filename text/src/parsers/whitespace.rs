@@ -29,19 +29,22 @@ where
         &self,
         input: &'a I
     ) -> ModeResult<I::Slice , (), (), _Mode> {
-        let start: usize = input.save_cursor();
+        let start: usize = input.store_cursor();
         loop {
-            let cursor: usize = input.save_cursor();
-            let Some (character) = input.next() else { break };
-            if !character.is_whitespace() { input.restore_cursor(cursor); break }
+            if let Some (character) = input.peek() && character.is_whitespace() {
+                input.advance();
+            } else { break };
         }
-        let length: usize = input.save_cursor() - start;
-        if length > 0 {
+        let end: usize = input.store_cursor();
+        if end - start > 0 {
             Success (
-                _Mode::convert_output(input.consume(length).unwrap()),
+                _Mode::convert_output(input.slice(start, end)),
                 _Mode::new_message_container()
             )
-        } else { Failure (_Mode::convert_error(()), _Mode::new_message_container()) }
+        } else {
+            input.move_cursor(start);
+            Failure (_Mode::convert_error(()), _Mode::new_message_container())
+        }
     }
 
     implement_modes!('a, I::Slice, (), (), I);

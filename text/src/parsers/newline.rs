@@ -28,11 +28,10 @@ where
         &self,
         input: &'a I
     ) -> ModeResult<(), (), (), _Mode> {
-        let cursor: usize = input.save_cursor();
-        if let Some (character) = input.next() && character.is_newline() {
+        if let Some (character) = input.peek() && character.is_newline() {
+            input.advance();
             Success (_Mode::convert_output(()), _Mode::new_message_container())
         } else {
-            input.restore_cursor(cursor);
             Failure (_Mode::convert_error(()), _Mode::new_message_container())
         }
     }
