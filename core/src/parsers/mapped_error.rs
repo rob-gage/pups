@@ -19,7 +19,7 @@ struct MappedError<EA, F, P> {
 
 impl<'a, O, EA, EB, M, F, I, P> Parser<'a, O, EB, M, I> for MappedError<EA, F, P>
 where
-    F: Fn(EA) -> EB + Clone,
+    F: Fn(EA) -> EB,
     I: Input<'a>,
     P: Parser<'a, O, EA, M, I>,
 {
@@ -29,7 +29,7 @@ where
     ) -> ModeResult<O, EB, M, _Mode> {
         _Mode::map_error(
             self.parser.apply::<_Mode>(input),
-            self.function.clone()
+            &self.function
         )
     }
 
@@ -40,7 +40,7 @@ where
 /// Maps a parser's output to another type using a function
 pub const fn mapped_error<'a, O, EA, EB, M, I>(
     parser: impl Parser<'a, O, EA, M, I>,
-    function: impl Fn(EA) -> EB + Clone
+    function: impl Fn(EA) -> EB
 ) -> impl Parser<'a, O, EB, M, I>
 where
     I: Input<'a>,

@@ -8,23 +8,23 @@ use pups_core::Input;
 use std::marker::PhantomData;
 
 /// UTF-8 text that can be consumed by parsers
-pub struct Text<'a> {
+pub struct Text {
     /// The buffer that stores the `Text`
-    buffer: &'a str,
+    buffer: String,
     /// The byte offset in the buffer that represents the start of the `Text`
     byte_offset: usize,
 }
 
-impl<'a> Text<'a> {
+impl<'a> Text {
 
     /// Creates a new `Text` from a `&str`
     pub fn from_string(string: &'a str) -> Self {
-        Self { buffer: string, byte_offset: 0 }
+        Self { buffer: string.to_string(), byte_offset: 0 }
     }
 
 }
 
-impl<'a> Input<'a> for Text<'a> {
+impl<'a> Input<'a> for Text {
 
     type Item = char;
 
@@ -39,9 +39,9 @@ impl<'a> Input<'a> for Text<'a> {
         }
     }
 
-    fn slice(&'a self, start: usize, end: usize) -> &'a str { &self.buffer[start..end] }
-
     fn peek(&self) -> Option<Self::Item> { self.buffer[self.byte_offset..].chars().next() }
+
+    fn slice(&'a self, start: usize, end: usize) -> &'a str { &self.buffer[start..end] }
 
     fn move_cursor(&self, cursor: usize) {
         unsafe {
@@ -54,7 +54,7 @@ impl<'a> Input<'a> for Text<'a> {
 
 }
 
-impl<'a> TextInput for Text<'a> {
+impl<'a> TextInput for Text {
 
     fn starts_with(&self, string: &str) -> bool
     { self.buffer[self.byte_offset..].starts_with(string) }

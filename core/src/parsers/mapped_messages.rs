@@ -19,7 +19,7 @@ struct MappedMessages<MA, F, P> {
 
 impl<'a, O, E, MA, MB, F, I, P> Parser<'a, O, E, MB, I> for MappedMessages<MA, F, P>
 where
-    F: Fn(MA) -> MB + Clone,
+    F: Fn(MA) -> MB,
     I: Input<'a>,
     P: Parser<'a, O, E, MA, I>,
 {
@@ -30,7 +30,7 @@ where
     ) -> ModeResult<O, E, MB, _Mode> {
         _Mode::map_messages(
             self.parser.apply::<_Mode>(input),
-            self.function.clone()
+            &self.function
         )
     }
 
@@ -41,7 +41,7 @@ where
 /// Maps a parser's output to another type using a function
 pub const fn mapped_messages<'a, O, E, MA, MB, I>(
     parser: impl Parser<'a, O, E, MA, I>,
-    function: impl Fn(MA) -> MB + Clone
+    function: impl Fn(MA) -> MB
 ) -> impl Parser<'a, O, E, MB, I>
 where
     I: Input<'a>,

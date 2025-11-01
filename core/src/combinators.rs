@@ -46,21 +46,21 @@ where
     /// Maps a parser's output to another type using a function
     fn map<_O>(
         self,
-        f: impl Fn(O) -> _O + Clone
+        f: impl Fn(O) -> _O
     ) -> impl Parser<'a, _O, E, M, I>
     { mapped(self, f) }
 
     /// Maps a parser's error to another type using a function
     fn map_error<_E>(
         self,
-        f: impl Fn(E) -> _E + Clone
+        f: impl Fn(E) -> _E
     ) -> impl Parser<'a, O, _E, M, I>
     { mapped_error(self, f) }
 
     /// Maps a parser's messages to another type using a function
     fn map_messages<_M>(
         self,
-        f: impl Fn(M) -> _M + Clone
+        f: impl Fn(M) -> _M
     ) -> impl Parser<'a, O, E, _M, I>
     { mapped_messages(self, f) }
 
