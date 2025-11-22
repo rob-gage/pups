@@ -9,8 +9,15 @@ macro_rules! implement_modes {
         ) -> bool {
             self.apply::<$crate::Check>(input).is_success()
         }
-
+        
         fn parse(
+            &self,
+            input: &$lifetime $I,
+        ) -> Result<$O, $E> {
+            self.apply::<$crate::Parse>(input).to_result()
+        }
+
+        fn parse_verbose(
             &self,
             input: &$lifetime $I,
         ) -> $crate::ModeResult<$O, $E, $M, $crate::Verbose> {

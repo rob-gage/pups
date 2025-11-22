@@ -33,10 +33,23 @@ where
         _Mode::apply_parser(self, input)
     }
 
-    fn check(&self, input: &'a I) -> bool { self.parse(input).is_success() }
+    fn check(&self, input: &'a I) -> bool { self.parse_verbose(input).is_success() }
 
-    fn parse(&self, input: &'a I) -> ModeResult<O, E, M, Verbose> {
+    fn parse(&self, input: &'a I) -> Result<O, E> {
         match self.parser.parse(input) {
+            Ok (output) => {
+                println!("{} successfully parsed output: {:?}", self.name, output);
+                Ok (output)
+            }
+            Err (error) => {
+                eprintln!("{} encountered error: {:?}", self.name, error);
+                Err (error)
+            }
+        }
+    }
+
+    fn parse_verbose(&self, input: &'a I) -> ModeResult<O, E, M, Verbose> {
+        match self.parser.parse_verbose(input) {
             Success (output, messages) => {
                 println!("{} successfully parsed output: {:?}", self.name, output);
                 Success (output, messages)

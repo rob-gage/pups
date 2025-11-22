@@ -63,9 +63,12 @@ where
 
     /// Checks input, returning a boolean if it matches this parser
     fn check(&self, input: &'a I) -> bool;
+    
+    /// Parses input, returning an output or error
+    fn parse(&self, input: &'a I) -> Result<O, E>;
 
-    /// Parses input, returning a fully detailed result
-    fn parse(&self, input: &'a I) -> ModeResult<O, E, M, Verbose>;
+    /// Parses input, returning a fully detailed result with messages
+    fn parse_verbose(&self, input: &'a I) -> ModeResult<O, E, M, Verbose>;
 
 }
 
@@ -79,8 +82,10 @@ where
         _Mode::apply_parser(self, input)
     }
 
-    fn check(&self, input: &'a I) -> bool { self.parse(input).is_success() }
+    fn check(&self, input: &'a I) -> bool { self.parse_verbose(input).is_success() }
 
-    fn parse(&self, input: &'a I) -> ModeResult<O, E, M, Verbose> { self(input) }
+    fn parse(&self, input: &'a I) -> Result<O, E> { self.parse_verbose(input).to_result() }
+
+    fn parse_verbose(&self, input: &'a I) -> ModeResult<O, E, M, Verbose> { self(input) }
 
 }

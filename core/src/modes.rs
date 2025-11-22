@@ -154,6 +154,86 @@ impl Mode for Check {
 }
 
 
+/// Parser mode that extracts output or an error from the parser's input
+pub struct Parse;
+
+impl Mode for Parse {
+
+    type OutputForm<O> = O;
+
+    type ErrorForm<E> = E;
+
+    type MessageContainer<M> = ();
+
+    fn apply_parser<'a, O, E, M, I, P>(parser: &P, input: &'a I) -> ModeResult<O, E, M, Self>
+    where
+        I: Input<'a>,
+        P: Parser<'a, O, E, M, I> + ?Sized,
+    {
+        match parser.parse(input) {
+            Ok (output) => Success(output, ()),
+            Err (error) => Failure(error, ()),
+        }
+    }
+
+    fn convert_output<O>(output: impl Into<O>) -> O { output.into() }
+
+    fn convert_error<E>(error: impl Into<E>) -> E  { error.into() }
+
+    fn merge_outputs<OA1, OA2, OB>(
+        output_1: OA1,
+        output_2: OA2,
+        function: impl Fn(OA1, OA2) -> OB
+    ) -> OB { Self::convert_output(function(output_1, output_2)) }
+
+    fn merge_errors<EA1, EA2, EB>(
+        error_1: EA1,
+        error_2: EA2,
+        function: impl Fn(EA1, EA2) -> EB
+    ) -> EB { Self::convert_error(function(error_1, error_2)) }
+
+    fn merge_message_containers<M>(
+        _: (),
+        _: impl Into<()>
+    ) -> () { () }
+
+    fn map_output<OA, OB, E, M>(
+        result: ModeResult<OA, E, M, Self>,
+        function: impl Fn(OA) -> OB,
+    ) -> ModeResult<OB, E, M, Self> {
+        match result {
+            Success (output, _) => Success (function(output), ()),
+            Failure (error, _) => Failure (error, ()),
+        }
+    }
+
+    fn map_error<O, EA, EB, M>(
+        result: ModeResult<O, EA, M, Self>,
+        function: impl Fn(EA) -> EB,
+    ) -> ModeResult<O, EB, M, Self> {
+        match result {
+            Success (output, _) => Success (output, ()),
+            Failure (error, _) => Failure (function(error), ()),
+        }
+    }
+
+    fn map_messages<O, E, MA, MB>(
+        result: ModeResult<O, E, MA, Self>,
+        _: impl Fn(MA) -> MB,
+    ) -> ModeResult<O, E, MB, Self> {
+        match result {
+            Success(output, _) => Success(output, ()),
+            Failure(error, _) => Failure(error, ()),
+        }
+    }
+
+    fn new_message_container<M>() -> () { () }
+
+    fn add_message_to_container<M>(_: &mut Self::MessageContainer<M>, _: M) { }
+
+}
+
+
 /// Parser mode that extracts all information from the parser's input
 pub struct Verbose;
 
@@ -169,7 +249,7 @@ impl Mode for Verbose {
     where
         I: Input<'a>,
         P: Parser<'a, O, E, M, I> + ?Sized,
-    { parser.parse(input) }
+    { parser.parse_verbose(input) }
 
     fn convert_output<O>(output: impl Into<O>) -> O { output.into() }
 

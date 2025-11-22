@@ -14,6 +14,7 @@ pub mod prelude {
         mode_result::ModeResult,
         modes::{
             Check,
+            Parse,
             Verbose,
         },
         parsers::*,
