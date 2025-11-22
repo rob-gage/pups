@@ -155,9 +155,9 @@ impl Mode for Check {
 
 
 /// Parser mode that extracts all information from the parser's input
-pub struct Parse;
+pub struct Verbose;
 
-impl Mode for Parse {
+impl Mode for Verbose {
 
     type OutputForm<O> = O;
 

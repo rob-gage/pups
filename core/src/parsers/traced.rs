@@ -11,7 +11,7 @@ use crate::{
         Failure,
         Success,
     },
-    Parse,
+    Verbose,
     Parser,
 };
 use std::fmt::Debug;
@@ -35,7 +35,7 @@ where
 
     fn check(&self, input: &'a I) -> bool { self.parse(input).is_success() }
 
-    fn parse(&self, input: &'a I) -> ModeResult<O, E, M, Parse> {
+    fn parse(&self, input: &'a I) -> ModeResult<O, E, M, Verbose> {
         match self.parser.parse(input) {
             Success (output, messages) => {
                 println!("{} successfully parsed output: {:?}", self.name, output);

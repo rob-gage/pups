@@ -13,8 +13,8 @@ macro_rules! implement_modes {
         fn parse(
             &self,
             input: &$lifetime $I,
-        ) -> $crate::ModeResult<$O, $E, $M, $crate::Parse> {
-            self.apply::<$crate::Parse>(input)
+        ) -> $crate::ModeResult<$O, $E, $M, $crate::Verbose> {
+            self.apply::<$crate::Verbose>(input)
         }
     };
 }

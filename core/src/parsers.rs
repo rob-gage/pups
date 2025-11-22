@@ -19,7 +19,7 @@ use crate::{
     Check,
     Input,
     Mode,
-    Parse,
+    Verbose,
     ModeResult,
 };
 use std::marker::PhantomData;
@@ -65,13 +65,13 @@ where
     fn check(&self, input: &'a I) -> bool;
 
     /// Parses input, returning a fully detailed result
-    fn parse(&self, input: &'a I) -> ModeResult<O, E, M, Parse>;
+    fn parse(&self, input: &'a I) -> ModeResult<O, E, M, Verbose>;
 
 }
 
 impl<'a, O, E, M, F, I> Parser<'a, O, E, M, I> for F
 where
-    F: Fn(&'a I) -> ModeResult<O, E, M, Parse>,
+    F: Fn(&'a I) -> ModeResult<O, E, M, Verbose>,
     I: Input<'a> +'a
 {
 
@@ -81,6 +81,6 @@ where
 
     fn check(&self, input: &'a I) -> bool { self.parse(input).is_success() }
 
-    fn parse(&self, input: &'a I) -> ModeResult<O, E, M, Parse> { self(input) }
+    fn parse(&self, input: &'a I) -> ModeResult<O, E, M, Verbose> { self(input) }
 
 }

@@ -14,13 +14,13 @@ pub mod prelude {
         mode_result::ModeResult,
         modes::{
             Check,
-            Parse,
+            Verbose,
         },
         parsers::*,
     };
 
     /// Shorthand result type for parsers
-    pub type ParseResult<O, E = (), M = ()> = ModeResult<O, E, M, Parse>;
+    pub type ParseResult<O, E = (), M = ()> = ModeResult<O, E, M, Verbose>;
 
 }
 
