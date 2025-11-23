@@ -69,9 +69,9 @@ where
 
 
 // implementation for functions that return results
-impl<'a, O, E, I> Parser<'a, O, E, (), I> for fn(&'a I) -> Result<O, E>
+impl<'a, O, E, I> Parser<'a, O, E, (), I> for fn(&I) -> Result<O, E>
 where
-    I: Input<'a> + 'a,
+    I: Input<'a>,
 {
 
     fn apply<_Mode: Mode>(&self, input: &'a I) -> ModeResult<O, E, (), _Mode> {
@@ -90,9 +90,9 @@ where
 
 
 // implementation for functions that return results with messages
-impl<'a, O, E, M, I> Parser<'a, O, E, M, I> for fn(&'a I) -> (Result<O, E>, Vec<M>)
+impl<'a, O, E, M, I> Parser<'a, O, E, M, I> for fn(&I) -> (Result<O, E>, Vec<M>)
 where
-    I: Input<'a> +'a
+    I: Input<'a>
 {
 
     fn apply<_Mode: Mode>(&self, input: &'a I) -> ModeResult<O, E, M, _Mode> {

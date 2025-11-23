@@ -21,7 +21,10 @@ pub mod prelude {
     };
 
     /// Shorthand result type for parsers
-    pub type ParseResult<O, E = (), M = ()> = ModeResult<O, E, M, Verbose>;
+    pub type ParseResult<O, E = ()> = ModeResult<O, E, (), Parse>;
+    
+    /// Shorthand result type for verbose parsers
+    pub type VerboseResult<O, E = (), M = ()> = ModeResult<O, E, M, Verbose>;
 
 }
 
