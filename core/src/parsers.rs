@@ -15,13 +15,7 @@ mod mapped_messages;
 mod mapped_error;
 mod traced;
 
-use crate::{
-    Check,
-    Input,
-    Mode,
-    Verbose,
-    ModeResult,
-};
+use crate::{Check, Input, Mode, Parse, Verbose, ModeResult, Combinators};
 use std::marker::PhantomData;
 
 pub use boxed::boxed;
@@ -46,6 +40,7 @@ pub use sequenced::{
     terminated,
 };
 pub use traced::traced;
+use crate::ModeResult::{Failure, Success};
 
 /// Implementors can be parsed from an input type
 pub trait Parser<'a, O, E, M, I>
@@ -63,18 +58,40 @@ where
 
     /// Checks input, returning a boolean if it matches this parser
     fn check(&self, input: &'a I) -> bool;
-    
+
     /// Parses input, returning an output or error
     fn parse(&self, input: &'a I) -> Result<O, E>;
 
     /// Parses input, returning a fully detailed result with messages
-    fn parse_verbose(&self, input: &'a I) -> ModeResult<O, E, M, Verbose>;
+    fn verbose(&self, input: &'a I) -> (Result<O, E>, Vec<M>);
 
 }
 
-impl<'a, O, E, M, F, I> Parser<'a, O, E, M, I> for F
+
+// implementation for functions that return results
+impl<'a, O, E, I> Parser<'a, O, E, (), I> for fn(&'a I) -> Result<O, E>
 where
-    F: Fn(&'a I) -> ModeResult<O, E, M, Verbose>,
+    I: Input<'a> + 'a,
+{
+
+    fn apply<_Mode: Mode>(&self, input: &'a I) -> ModeResult<O, E, (), _Mode> {
+        _Mode::apply_parser(self, input)
+    }
+
+    fn check(&self, input: &'a I) -> bool { self.parse(input).is_ok() }
+
+    fn parse(&self, input: &'a I) -> Result<O, E> { self(input) }
+
+    fn verbose(&self, input: &'a I) -> (Result<O, E>, Vec<()>) {
+        (self(input), Vec::new())
+    }
+
+}
+
+
+// implementation for functions that return results with messages
+impl<'a, O, E, M, I> Parser<'a, O, E, M, I> for fn(&'a I) -> (Result<O, E>, Vec<M>)
+where
     I: Input<'a> +'a
 {
 
@@ -82,10 +99,12 @@ where
         _Mode::apply_parser(self, input)
     }
 
-    fn check(&self, input: &'a I) -> bool { self.parse_verbose(input).is_success() }
+    fn check(&self, input: &'a I) -> bool { self.parse(input).is_ok() }
 
-    fn parse(&self, input: &'a I) -> Result<O, E> { self.parse_verbose(input).to_result() }
+    fn parse(&self, input: &'a I) -> Result<O, E> {
+        self(input).0
+    }
 
-    fn parse_verbose(&self, input: &'a I) -> ModeResult<O, E, M, Verbose> { self(input) }
+    fn verbose(&self, input: &'a I) -> (Result<O, E>, Vec<M>) { self(input) }
 
 }

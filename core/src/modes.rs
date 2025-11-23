@@ -249,7 +249,13 @@ impl Mode for Verbose {
     where
         I: Input<'a>,
         P: Parser<'a, O, E, M, I> + ?Sized,
-    { parser.parse_verbose(input) }
+    {
+        let (result, messages): (Result<O, E>, Vec<M>) = parser.verbose(input);
+        match result {
+            Ok (output) => Success (output, messages),
+            Err (error) => Failure (error, messages)
+        }
+    }
 
     fn convert_output<O>(output: impl Into<O>) -> O { output.into() }
 

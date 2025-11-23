@@ -3,6 +3,7 @@
 #[macro_export]
 macro_rules! implement_modes {
     ($lifetime:lifetime, $O:ty, $E:ty, $M:ty, $I:ty) => {
+        
         fn check(
             &self,
             input: &$lifetime $I,
@@ -17,11 +18,14 @@ macro_rules! implement_modes {
             self.apply::<$crate::Parse>(input).to_result()
         }
 
-        fn parse_verbose(
+        fn verbose(
             &self,
             input: &$lifetime $I,
-        ) -> $crate::ModeResult<$O, $E, $M, $crate::Verbose> {
-            self.apply::<$crate::Verbose>(input)
+        ) -> (Result<$O, $E>, Vec<$M>) {
+            match self.apply::<$crate::Verbose>(input) {
+                ModeResult::Success (output, messages) => (Ok (output), messages),
+                ModeResult::Failure (error, messages) => (Err (error), messages),
+            }
         }
     };
 }
