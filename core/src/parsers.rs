@@ -68,9 +68,10 @@ where
 }
 
 
-// implementation for functions that return results
-impl<'a, O, E, I> Parser<'a, O, E, (), I> for fn(&I) -> Result<O, E>
+// implementation for functions
+impl<'a, O, E, F, I> Parser<'a, O, E, (), I> for F
 where
+    F: Fn(&I) -> Result<O, E>,
     I: Input<'a>,
 {
 
@@ -85,26 +86,5 @@ where
     fn verbose(&self, input: &'a I) -> (Result<O, E>, Vec<()>) {
         (self(input), Vec::new())
     }
-
-}
-
-
-// implementation for functions that return results with messages
-impl<'a, O, E, M, I> Parser<'a, O, E, M, I> for fn(&I) -> (Result<O, E>, Vec<M>)
-where
-    I: Input<'a>
-{
-
-    fn apply<_Mode: Mode>(&self, input: &'a I) -> ModeResult<O, E, M, _Mode> {
-        _Mode::apply_parser(self, input)
-    }
-
-    fn check(&self, input: &'a I) -> bool { self.parse(input).is_ok() }
-
-    fn parse(&self, input: &'a I) -> Result<O, E> {
-        self(input).0
-    }
-
-    fn verbose(&self, input: &'a I) -> (Result<O, E>, Vec<M>) { self(input) }
 
 }
