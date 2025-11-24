@@ -15,9 +15,17 @@ mod mapped_messages;
 mod mapped_error;
 mod traced;
 
-use crate::{Check, Input, Mode, Parse, Verbose, ModeResult, Combinators};
+use crate::{
+    Check,
+    Input,
+    Mode,
+    Parse,
+    Verbose,
+    ModeResult,
+    Combinators,
+};
 use std::marker::PhantomData;
-
+use std::ops::Deref;
 pub use boxed::boxed;
 pub use choice::choice;
 pub use emitting::emitting;
@@ -86,5 +94,23 @@ where
     fn verbose(&self, input: &'a I) -> (Result<O, E>, Vec<()>) {
         (self(input), Vec::new())
     }
+
+}
+
+// implementation of boxed parsers
+impl <'a, O, E, M, I> Parser<'a, O, E, M, I> for Box<dyn Parser<'a, O, E, M, I>>
+where
+    I: Input<'a>
+{
+
+    fn apply<_Mode: Mode>(&self, input: &'a I) -> ModeResult<O, E, M, _Mode> {
+        _Mode::apply_parser(self, input)
+    }
+
+    fn check(&self, input: &'a I) -> bool { (**self).check(input) }
+
+    fn parse(&self, input: &'a I) -> Result<O, E> { (**self).parse(input) }
+
+    fn verbose(&self, input: &'a I) -> (Result<O, E>, Vec<M>) { (**self).verbose(input) }
 
 }

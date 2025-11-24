@@ -11,23 +11,23 @@ use std::{
 };
 
 /// UTF-8 text that can be consumed by parsers
-pub struct Text<'a> {
+pub struct Text {
     /// The buffer that stores the `Text`
-    buffer: &'a str,
+    buffer: String,
     /// The byte offset in the buffer that represents the start of the `Text`
     byte_offset: UnsafeCell<usize>,
 }
 
-impl<'a> Text<'a> {
+impl<'a> Text {
 
     /// Creates a new `Text` from a `&str`
     pub fn from_string(string: &'a str) -> Self {
-        Self { buffer: string, byte_offset: UnsafeCell::new(0) }
+        Self { buffer: string.to_string(), byte_offset: UnsafeCell::new(0) }
     }
 
 }
 
-impl<'a> Input<'a> for Text<'a> {
+impl<'a> Input<'a> for Text {
 
     type Item = char;
 
@@ -52,7 +52,7 @@ impl<'a> Input<'a> for Text<'a> {
 
 }
 
-impl<'a> TextInput for Text<'a> {
+impl<'a> TextInput for Text {
 
     fn starts_with(&self, string: &str) -> bool {
         let byte_offset: usize = unsafe { *self.byte_offset.get() };

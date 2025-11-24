@@ -17,7 +17,7 @@ where
 {
 
     /// Boxes a parser, performing type erasure so it can be used in combinators like `choice`
-    fn boxed(self) -> impl Parser<'a, O, E, M, I>
+    fn boxed(self) -> Box<dyn Parser<'a, O, E, M, I> + 'a>
     { boxed(self) }
 
     /// If necessary, runs a fallback parser to recover from the failure of the original parser

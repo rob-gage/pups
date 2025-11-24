@@ -12,51 +12,56 @@ use crate::{
     Parser,
 };
 
+
+/// Macro to automatically implement choice for tuples of various sizes
+macro_rules! implement_choice {
+    ( $first:ident $( $rest:ident )* ) => {
+        choice_tuple!($first $(, $rest)*);
+    };
+}
+
+macro_rules! choice_tuple {
+    ( $first:ident $(, $rest:ident)* ) => {
+        impl<'a, O, E, M, I, $first, $( $rest, )*> Parser<'a, O, E, M, I>
+        for Choice<($first, $( $rest, )*)>
+        where
+            I: Input<'a>,
+            $first: Parser<'a, O, E, M, I>,
+            $( $rest: Parser<'a, O, E, M, I>, )*
+        {
+            fn apply<_Mode: Mode>(
+                &self,
+                input: &'a I
+            ) -> ModeResult<O, E, M, _Mode> {
+                let ($first, $( $rest, )*) = &self.0;
+                let mut result: ModeResult<O, E, M, _Mode> = _Mode::apply_parser($first, input);
+                $(
+                    result = match result {
+                        ModeResult::Success(_, _) => return result,
+                        ModeResult::Failure(_, _) => _Mode::apply_parser($rest, input),
+                    };
+                )*
+                result
+            }
+
+            implement_modes!('a, O, E, M, I);
+        }
+    }
+}
+
+
 pub struct Choice<PL> (PL);
 
-impl<'a, O, E, M, I, P, const COUNT: usize> Parser<'a, O, E, M, I> for Choice<[P; COUNT]> where
-    I: Input<'a>,
-    P: Parser<'a, O, E, M, I>,
-{
 
-    fn apply<_Mode: Mode>(&self, input: &'a I) -> ModeResult<O, E, M, _Mode> {
-        let mut last_error: Option<_Mode::ErrorForm<E>> = None;
-        let mut last_messages: Option<_Mode::MessageContainer<M>> = None;
-        for parser in &self.0 {
-            match parser.apply::<_Mode>(input) {
-                Success(output, messages) => return Success(output, messages),
-                Failure(error, messages) => {
-                    last_error = Some(error);
-                    last_messages = Some(messages);
-                }
-            }
-        }
-        Failure(
-            last_error.expect("`choice` must not be used with no parsers"),
-            last_messages.expect("`choice` must not be used with no parsers"),
-        )
-    }
+implement_choice!(P1);
+implement_choice!(P1 P2);
+implement_choice!(P1 P2 P3);
+implement_choice!(P1 P2 P3 P4);
+implement_choice!(P1 P2 P3 P4 P5);
+implement_choice!(P1 P2 P3 P4 P5 P6);
+implement_choice!(P1 P2 P3 P4 P5 P6 P7);
+implement_choice!(P1 P2 P3 P4 P5 P6 P7 P8);
 
-    implement_modes!('a, O, E, M, I);
-
-}
-
-impl<'a, O, E, M, I, P1, P2> Parser<'a, O, E, M, I> for Choice<(P1, P2)> where
-    I: Input<'a>,
-    P1: Parser<'a, O, E, M, I>,
-    P2: Parser<'a, O, E, M, I>,
-{
-
-    fn apply<_Mode: Mode>(&self, input: &'a I) -> ModeResult<O, E, M, _Mode> {
-        match self.0.0.apply::<_Mode>(input) {
-            Failure (_, _) => self.0.1.apply::<_Mode>(input),
-            success => success,
-        }
-    }
-
-    implement_modes!('a, O, E, M, I);
-
-}
 
 /// Optionally applies a parser, converting a failure into `Option::None`
 pub const fn choice<'a, O, E, M, I, PL>(

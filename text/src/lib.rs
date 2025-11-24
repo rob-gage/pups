@@ -9,6 +9,7 @@ use character::Character;
 use text_input::TextInput;
 
 pub mod prelude {
+    use pups_core::Parser;
     pub use crate::{
         parsers::*,
         text::Text,
