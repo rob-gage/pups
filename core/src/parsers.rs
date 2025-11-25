@@ -32,7 +32,8 @@ pub use emitting::emitting;
 pub use end::end;
 pub use first::first;
 pub use iterated::{
-    many,
+    repeated,
+    repeated_at_least,
     separated,
 };
 pub use mapped::mapped;
