@@ -12,7 +12,7 @@ use crate::{
     Parser,
 };
 
-struct First<P> (P);
+pub struct First<P> (P);
 
 impl<'a, O, E, M, I, P> Parser<'a, Option<O>, E, M, I> for First<P>
 where

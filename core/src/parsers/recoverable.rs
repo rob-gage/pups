@@ -11,7 +11,7 @@ use crate::{
     Parser,
 };
 
-struct Recoverable<P1, P2> {
+pub struct Recoverable<P1, P2> {
     /// The fallback parser
     fallback: P2,
     /// The parser that is applied first

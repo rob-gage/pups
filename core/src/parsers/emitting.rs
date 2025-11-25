@@ -13,7 +13,7 @@ use crate::{
 };
 use std::marker::PhantomData;
 
-struct Emitting<OA, OB, P> {
+pub struct Emitting<OA, OB, P> {
     /// The new output
     output: OB,
     /// The parser that has its output replaced

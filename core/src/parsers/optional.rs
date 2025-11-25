@@ -12,7 +12,7 @@ use crate::{
     Parser,
 };
 
-struct Optional<P> (P);
+pub struct Optional<P> (P);
 
 impl<'a, O, E, M, I, P> Parser<'a, Option<O>, E, M, I> for Optional<P>
 where

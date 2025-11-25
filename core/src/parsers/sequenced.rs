@@ -13,7 +13,7 @@ use crate::{
     Parser,
 };
 
-struct Sequenced<P1, P2> {
+pub struct Sequenced<P1, P2> {
     /// The head of the `Sequence`
     head: P1,
     /// The tail of the `Sequence`

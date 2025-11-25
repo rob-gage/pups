@@ -12,7 +12,7 @@ use crate::{
     Parser,
 };
 
-struct End;
+pub struct End;
 
 impl<'a, I> Parser<'a, (), (), (), I> for End
 where

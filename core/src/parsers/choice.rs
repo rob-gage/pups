@@ -49,9 +49,7 @@ macro_rules! choice_tuple {
     }
 }
 
-
 pub struct Choice<PL> (PL);
-
 
 implement_choice!(P1);
 implement_choice!(P1 P2);

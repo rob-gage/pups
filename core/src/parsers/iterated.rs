@@ -2,7 +2,6 @@
 
 use crate::{
     implement_modes,
-    nothing,
     Input,
     Mode,
     ModeResult::{
@@ -14,7 +13,7 @@ use crate::{
 };
 use std::marker::PhantomData;
 
-struct Iterated<O2, P1, P2> {
+pub struct Iterated<O2, P1, P2> {
     /// The maximum number of parser iterations that this combinator applies
     maximum: Option<usize>,
     /// The minimum number of parser iterations that this combinator applies
@@ -110,23 +109,13 @@ where
 }
 
 /// Iterates application of a parser
-pub const fn repeated<'a, O, E, M, I, P>(
+pub const fn many<'a, O, E, M, I, P>(
     parser: P,
 ) -> impl Parser<'a, Vec<O>, E, M, I>
 where
     I: Input<'a>,
     P: Parser<'a, O, E, M, I>,
 { Iterated { maximum: None, minimum: 0, parser, separator: nothing(), _phantom: PhantomData } }
-
-/// Iterates application of a parser at least a minimum number of times
-pub const fn repeated_at_least<'a, O, E, M, I, P>(
-    parser: P,
-    minimum: usize,
-) -> impl Parser<'a, Vec<O>, E, M, I>
-where
-    I: Input<'a>,
-    P: Parser<'a, O, E, M, I>,
-{ Iterated { maximum: None, minimum, parser, separator: nothing(), _phantom: PhantomData } }
 
 /// Iterates application of a parser separated by application of another parser
 pub const fn separated<'a, E, I, M, O1, O2, P1, P2>(

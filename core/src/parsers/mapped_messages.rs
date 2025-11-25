@@ -9,7 +9,7 @@ use crate::{
 };
 use std::marker::PhantomData;
 
-struct MappedMessages<MA, F, P> {
+pub struct MappedMessages<MA, F, P> {
     /// The parser whose messages are mapped
     parser: P,
     /// The function used to map the messages of the parser

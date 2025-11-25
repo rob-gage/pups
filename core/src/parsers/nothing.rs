@@ -12,7 +12,7 @@ use crate::{
 };
 use std::marker::PhantomData;
 
-struct Nothing<E, M> (PhantomData<(E, M)>);
+pub struct Nothing<E, M> (PhantomData<(E, M)>);
 
 impl<'a, E, M, I> Parser<'a, (), E, M, I> for Nothing<E, M>
 where

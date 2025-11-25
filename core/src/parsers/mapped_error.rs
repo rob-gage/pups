@@ -9,7 +9,7 @@ use crate::{
 };
 use std::marker::PhantomData;
 
-struct MappedError<EA, F, P> {
+pub struct MappedError<EA, F, P> {
     /// The parser whose error is mapped
     parser: P,
     /// The function used to map the error of the parser

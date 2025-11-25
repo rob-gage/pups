@@ -16,7 +16,7 @@ use crate::{
 };
 use std::fmt::Debug;
 
-struct Traced<P> {
+pub struct Traced<P> {
     parser: P,
     name: &'static str,
 }

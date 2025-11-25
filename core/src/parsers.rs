@@ -15,25 +15,36 @@ mod mapped_messages;
 mod mapped_error;
 mod traced;
 
+use choice::Choice;
+use emitting::Emitting;
+use end::End;
+use first::First;
+use iterated::Iterated;
+use mapped::Mapped;
+use mapped_error::MappedError;
+use mapped_messages::MappedMessages;
+use nothing::Nothing;
+use optional::Optional;
+use recoverable::Recoverable;
+use sequenced::Sequenced;
+use traced::Traced;
+
 use crate::{
-    Check,
     Input,
     Mode,
-    Parse,
     Verbose,
     ModeResult,
     Combinators,
 };
-use std::marker::PhantomData;
 use std::ops::Deref;
+
 pub use boxed::boxed;
 pub use choice::choice;
 pub use emitting::emitting;
 pub use end::end;
 pub use first::first;
 pub use iterated::{
-    repeated,
-    repeated_at_least,
+    many,
     separated,
 };
 pub use mapped::mapped;
@@ -49,7 +60,6 @@ pub use sequenced::{
     terminated,
 };
 pub use traced::traced;
-use crate::ModeResult::{Failure, Success};
 
 /// Implementors can be parsed from an input type
 pub trait Parser<'a, O, E, M, I>

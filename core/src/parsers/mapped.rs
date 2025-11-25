@@ -9,7 +9,7 @@ use crate::{
 };
 use std::marker::PhantomData;
 
-struct Mapped<OA, F, P> {
+pub struct Mapped<OA, F, P> {
     /// The parser whose output is mapped
     parser: P,
     /// The function used to map the output of the parser
