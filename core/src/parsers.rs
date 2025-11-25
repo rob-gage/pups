@@ -44,8 +44,10 @@ pub use emitting::emitting;
 pub use end::end;
 pub use first::first;
 pub use iterated::{
-    many,
+    repeated,
+    repeated_at_least_once,
     separated,
+    separated_at_least_once,
 };
 pub use mapped::mapped;
 pub use mapped_error::mapped_error;

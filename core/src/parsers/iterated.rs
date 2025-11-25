@@ -3,6 +3,7 @@
 use crate::{
     implement_modes,
     Input,
+    nothing,
     Mode,
     ModeResult::{
         self,
@@ -109,13 +110,22 @@ where
 }
 
 /// Iterates application of a parser
-pub const fn many<'a, O, E, M, I, P>(
+pub const fn repeated<'a, O, E, M, I, P>(
     parser: P,
 ) -> impl Parser<'a, Vec<O>, E, M, I>
 where
     I: Input<'a>,
     P: Parser<'a, O, E, M, I>,
 { Iterated { maximum: None, minimum: 0, parser, separator: nothing(), _phantom: PhantomData } }
+
+/// Iterates application of a parser at least once
+pub const fn repeated_at_least_once<'a, O, E, M, I, P>(
+    parser: P,
+) -> impl Parser<'a, Vec<O>, E, M, I>
+where
+    I: Input<'a>,
+    P: Parser<'a, O, E, M, I>,
+{ Iterated { maximum: None, minimum: 1, parser, separator: nothing(), _phantom: PhantomData } }
 
 /// Iterates application of a parser separated by application of another parser
 pub const fn separated<'a, E, I, M, O1, O2, P1, P2>(
@@ -127,3 +137,15 @@ where
     P1: Parser<'a, O1, E, M, I>,
     P2: Parser<'a, O2, E, M, I>,
 { Iterated { maximum: None, minimum: 0, parser, separator, _phantom: PhantomData } }
+
+/// Iterates application of a parser separated by application of another parser at least once
+pub const fn separated_at_least_once<'a, E, I, M, O1, O2, P1, P2>(
+    parser: P1,
+    separator: P2
+) -> impl Parser<'a, Vec<O1>, E, M, I>
+where
+    I: Input<'a>,
+    P1: Parser<'a, O1, E, M, I>,
+    P2: Parser<'a, O2, E, M, I>,
+{ Iterated { maximum: None, minimum: 1, parser, separator, _phantom: PhantomData } }
+
