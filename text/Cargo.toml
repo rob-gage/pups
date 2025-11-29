@@ -2,7 +2,7 @@
 
 [package]
 name = "pups_text"
-version = "0.1.14"
+version = "0.1.15"
 license = "MIT"
 description = "Pretty Understandable Parsers"
 readme = "../README.md"
@@ -10,5 +10,5 @@ repository = "https://github.com/rob-gage/pups"
 edition = "2024"
 
 [dependencies]
-pups_core = { version = "0.1.14", path = "../core" }
+pups_core = { version = "0.1.15", path = "../core" }
 unicode-ident = "1.0.19"
