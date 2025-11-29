@@ -45,9 +45,9 @@ pub use end::end;
 pub use first::first;
 pub use iterated::{
     repeated,
-    repeated_at_least_once,
+    repeated_at_least,
     separated,
-    separated_at_least_once,
+    separated_at_least,
 };
 pub use mapped::mapped;
 pub use mapped_error::mapped_error;
